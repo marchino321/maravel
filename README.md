@@ -4,7 +4,7 @@
 ![Maravel Framework Logo](docs/maravel_logo.png)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-active%20development-orange)
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
 ![GitHub release](https://img.shields.io/github/v/release/marchino321/maravel)
 ![GitHub issues](https://img.shields.io/github/issues/marchino321/maravel)
 ![GitHub last commit](https://img.shields.io/github/last-commit/marchino321/maravel)
