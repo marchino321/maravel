@@ -75,7 +75,7 @@ Maravel includes a minimal ExamplePlugin to demonstrate how the plugin system wo
 
 The goal of this plugin is educational: it shows the full lifecycle of a plugin in the simplest possible way.
 
-⸻
+
 
 📁 Plugin Structure
 
@@ -188,7 +188,7 @@ Plugins allow you to:
 
 This approach makes Maravel ideal for long-lived projects, SaaS platforms, and multi-client environments.
 
-⸻
+
 
 📌 Summary
 
@@ -203,7 +203,7 @@ If you understand this plugin, you understand how Maravel works.
 
 
 
-⸻
+
 
 🔔 Event Manager
 
@@ -227,7 +227,7 @@ EventManager::on("user.login", function ($session) {
   return $session;
 });
 ```
-⸻
+
 
 🔁 Centralized Core Updates (Key Feature)
 
@@ -256,7 +256,7 @@ Benefits
 		🛡️ Reduced errors and project divergence
 		🏢 Ideal for SaaS platforms, multi-site portals, and agencies
 
-⸻
+
 
 🧪 CLI
 
@@ -269,7 +269,7 @@ Maravel includes a dedicated CLI entry point (cli.php) for:
 
 Easily extensible with custom commands.
 
-⸻
+
 
 🔐 Security
 
@@ -280,7 +280,7 @@ Easily extensible with custom commands.
 
 (Extendable with CSRF protection, rate limiting, middleware, etc.)
 
-⸻
+
 
 ⚙️ Requirements
 
@@ -289,7 +289,7 @@ Easily extensible with custom commands.
 	✅	Composer
 	✅	MySQL / MariaDB database
 
-⸻
+
 
 🛣️ Roadmap (Evolving)
 
@@ -301,7 +301,7 @@ Easily extensible with custom commands.
 	❤️	Differential updates and rollback
 	❤️	API / JSON mode
 
-⸻
+
 
 🧠 Open Source Philosophy
 
@@ -316,7 +316,7 @@ This ensures:
 	❤️	transparency
 	❤️	freedom to extend Maravel in any direction
 
-⸻
+
 
 👤 Author
 
