@@ -61,11 +61,11 @@ Maravel includes an advanced Plugin System, inspired by the best CMS platforms b
 
 A plugin can:
 
-	•	Register routes
-	•	Add menu entries
-	•	Hook into events
-	•	Provide controllers, models, and views
-	•	Extend the application without modifying the Core
+	✅	Register routes
+	✅	Add menu entries
+	✅	Hook into events
+	✅	Provide controllers, models, and views
+	✅	Extend the application without modifying the Core
 
 👉 This allows building modular and toggleable features.
 
@@ -116,9 +116,10 @@ class ExamplePlugin extends PluginController
 }
 ```
 This file shows:
-	•	how a plugin is registered
-	•	how routes are defined inside a plugin
-	•	how events can be hooked without modifying the Core
+
+	⭐	how a plugin is registered
+	⭐	how routes are defined inside a plugin
+	⭐	how events can be hooked without modifying the Core
 
 🎮 ExampleController.php — Plugin controller
 
@@ -179,11 +180,11 @@ This controller behaves exactly like an App controller, proving that plugins are
 
 Plugins allow you to:
 
-	•	Keep the Core clean and stable
-	•	Encapsulate features
-	•	Enable or disable functionality
-	•	Reuse modules across multiple projects
-	•	Extend the framework without modifying its internals
+	✅	Keep the Core clean and stable
+	✅	Encapsulate features
+	✅	Enable or disable functionality
+	✅	Reuse modules across multiple projects
+	✅	Extend the framework without modifying its internals
 
 This approach makes Maravel ideal for long-lived projects, SaaS platforms, and multi-client environments.
 
@@ -193,10 +194,10 @@ This approach makes Maravel ideal for long-lived projects, SaaS platforms, and m
 
 The ExamplePlugin demonstrates:
 
-	•	Route registration inside a plugin
-	•	Controller logic isolated from the Core
-	•	Twig rendering from plugin views
-	•	Event-driven extensibility
+	⭕	Route registration inside a plugin
+	⭕	Controller logic isolated from the Core
+	⭕	Twig rendering from plugin views
+	⭕	Event-driven extensibility
 
 If you understand this plugin, you understand how Maravel works.
 
@@ -208,15 +209,15 @@ If you understand this plugin, you understand how Maravel works.
 
 The framework integrates an Event Manager that allows you to:
 
-	•	Decouple application logic
-	•	React to domain events
-	•	Extend behavior without modifying existing code
+	✅	Decouple application logic
+	✅	React to domain events
+	✅	Extend behavior without modifying existing code
 
 Examples:
 
-	•	profile.completed
-	•	listing.created
-	•	user.registered
+	⭕	profile.completed
+	⭕	listing.created
+	⭕	user.registered
 ```php
 
 EventManager::dispatch("user.login", $_SESSION);
@@ -234,10 +235,10 @@ Maravel Framework includes a centralized core update system, designed to manage 
 
 With a single command you can:
 
-	•	Scan the entire Core
-	•	Generate a structured representation (core.json)
-	•	Update shared files
-	•	Automatically distribute the updated core to all child projects
+	⭐	Scan the entire Core
+	⭐	Generate a structured representation (core.json)
+	⭐	Update shared files
+	⭐	Automatically distribute the updated core to all child projects
 
 Command
 ```bash
@@ -249,11 +250,11 @@ php build-core-json.php
 ```
 Benefits
 
-	•	🔁 Update the core only once
-	•	🧩 No impact on App/ or plugins
-	•	🚀 Continuous framework evolution
-	•	🛡️ Reduced errors and project divergence
-	•	🏢 Ideal for SaaS platforms, multi-site portals, and agencies
+		🔁 Update the core only once
+		🧩 No impact on App/ or plugins
+		🚀 Continuous framework evolution
+		🛡️ Reduced errors and project divergence
+		🏢 Ideal for SaaS platforms, multi-site portals, and agencies
 
 ⸻
 
@@ -261,10 +262,10 @@ Benefits
 
 Maravel includes a dedicated CLI entry point (cli.php) for:
 
-	•	Migrations
-	•	Maintenance operations
-	•	Internal scripts
-	•	Automated tasks
+	⭐	Migrations
+	⭐	Maintenance operations
+	⭐	Internal scripts
+	⭐	Automated tasks
 
 Easily extensible with custom commands.
 
@@ -272,10 +273,10 @@ Easily extensible with custom commands.
 
 🔐 Security
 
-	•	Protection against direct access
-	•	Centralized authentication
-	•	Session handling
-	•	Public / private area separation
+	🛃	Protection against direct access
+	🛃	Centralized authentication
+	🛃	Session handling
+	🛃	Public / private area separation
 
 (Extendable with CSRF protection, rate limiting, middleware, etc.)
 
@@ -283,22 +284,22 @@ Easily extensible with custom commands.
 
 ⚙️ Requirements
 
-	•	PHP ≥ 8.3
-	•	Common PHP extensions (PDO, JSON, mbstring)
-	•	Composer
-	•	MySQL / MariaDB database
+	✅	PHP ≥ 8.3
+	✅	Common PHP extensions (PDO, JSON, mbstring)
+	✅	Composer
+	✅	MySQL / MariaDB database
 
 ⸻
 
 🛣️ Roadmap (Evolving)
 
-	•	Middleware system
-	•	Response object
-	•	Validation layer
-	•	Dependency Injection Container
-	•	Core versioning
-	•	Differential updates and rollback
-	•	API / JSON mode
+	❤️	Middleware system
+	❤️	Response object
+	❤️	Validation layer
+	❤️	Dependency Injection Container
+	❤️	Core versioning
+	❤️	Differential updates and rollback
+	❤️	API / JSON mode
 
 ⸻
 
@@ -311,9 +312,9 @@ Business logic, client-specific modules, and commercial plugins are intentionall
 
 This ensures:
 
-	•	a stable and evolving core
-	•	transparency
-	•	freedom to extend Maravel in any direction
+	❤️	a stable and evolving core
+	❤️	transparency
+	❤️	freedom to extend Maravel in any direction
 
 ⸻
 
