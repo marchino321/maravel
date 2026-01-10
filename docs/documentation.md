@@ -1,4 +1,4 @@
-📌 Query Builder & Utilities
+## 📌 Query Builder & Utilities
 
 ## Insert
 ```php
