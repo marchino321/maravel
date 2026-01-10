@@ -1,155 +1,169 @@
 # 🚀 Maravel Framework
 
-**Maravel Framework** è un framework PHP MVC leggero, modulare e orientato al mondo reale, progettato per lo sviluppo di applicazioni web, portali e gestionali **scalabili e manutenibili nel tempo**.
+```md
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-active%20development-orange)
+```
 
-È pensato per chi vuole **controllo totale del codice**, senza rinunciare a una struttura moderna, estendibile e pronta per la produzione.
+**Maravel Framework** is a lightweight, modular PHP MVC framework focused on real-world needs, designed for building web applications, portals, and management systems that are **scalable and maintainable over time**.
 
-> ⚠️ Maravel **non è Laravel**.  
-> È un framework indipendente, ispirato a concetti moderni, ma costruito per esigenze pratiche e progetti reali.
+It is built for developers who want **full control over their code**, without giving up a modern, extensible, and production-ready structure.
+
+> ⚠️ Maravel **is not Laravel**.  
+> It is an independent framework, inspired by modern concepts, but built for practical needs and real projects.
 
 ---
 
-## ✨ Caratteristiche principali
+## ✨ Key Features
 
-- ✅ Architettura **MVC reale**
-- ✅ Separazione netta **Core / App**
-- ✅ Sistema **Plugin first-class**
-- ✅ **Event Manager** integrato
-- ✅ Supporto **Twig**
-- ✅ Router custom semplice e leggibile
-- ✅ Autenticazione centralizzata
+- ✅ **True MVC architecture**
+- ✅ Clear **Core / App** separation
+- ✅ **First-class Plugin system**
+- ✅ Integrated **Event Manager**
+- ✅ **Twig** support
+- ✅ Simple and readable custom router
+- ✅ Centralized authentication
 - ✅ Flash messages
-- ✅ CLI dedicata
-- ✅ Sistema di **update centralizzati del core**
-- ✅ PHP **8.3 / 8.4 ready**
-- ✅ Pensato per progetti multipli e distribuzione controllata
+- ✅ Dedicated CLI
+- ✅ **Centralized core update system**
+- ✅ **PHP 8.3 / 8.4 ready**
+- ✅ Designed for multi-project setups and controlled distribution
 
 ---
 
-## 📁 Struttura del progetto
+## 📁 Project Structure
 
 ```text
 /
-├── App/                # Logica applicativa (Controller, Models, Plugins, Services)
-├── Core/               # Core del framework (Router, Auth, View, Event, ecc.)
-├── ConfigFiles/        # Configurazioni
-├── MyFiles/            # Files distribuiti / sincronizzati
-├── migrations/         # Migrazioni PHP
-├── MigrationsSQL/      # Migrazioni SQL
-├── logs/               # Log applicativi
-├── template/           # Template base
-├── vendor/             # Dipendenze Composer
-├── index.php           # Entry point web
-├── cli.php             # Entry point CLI
-├── install.php         # Script di installazione
+├── App/                # Application logic (Controllers, Models, Plugins, Services)
+├── Core/               # Framework core (Router, Auth, View, Event, etc.)
+├── ConfigFiles/        # Configuration files
+├── MyFiles/            # Distributed / synchronized files
+├── migrations/         # PHP migrations
+├── MigrationsSQL/      # SQL migrations
+├── logs/               # Application logs
+├── template/           # Base templates
+├── vendor/             # Composer dependencies
+├── index.php           # Web entry point
+├── cli.php             # CLI entry point
+├── install.php         # Installation script
 ├── composer.json
+
 ```
 ---
+🔌 Plugin System
 
-## 🔌 Sistema Plugin
+Maravel includes an advanced Plugin System, inspired by the best CMS platforms but adapted to an MVC framework.
 
-Maravel include un **Plugin System avanzato**, ispirato ai migliori CMS ma adattato a un framework MVC.
+A plugin can:
+	•	Register routes
+	•	Add menu entries
+	•	Hook into events
+	•	Provide controllers, models, and views
+	•	Extend the application without modifying the Core
 
-Un plugin può:
-- Registrare rotte
-- Aggiungere voci di menu
-- Agganciarsi a eventi
-- Fornire controller, modelli e viste
-- Estendere l’app senza modificare il Core
+👉 This allows building modular and toggleable features.
 
-👉 Questo permette di sviluppare funzionalità **modulari e disattivabili**.
+⸻
 
----
+🔔 Event Manager
 
-## 🔔 Event Manager
+The framework integrates an Event Manager that allows you to:
+	•	Decouple application logic
+	•	React to domain events
+	•	Extend behavior without modifying existing code
 
-Il framework integra un **Event Manager** che consente di:
+Examples:
+	•	profile.completed
+	•	listing.created
+	•	user.registered
 
-- Disaccoppiare la logica
-- Reagire ad azioni di dominio
-- Estendere il comportamento senza modificare il codice esistente
+⸻
 
-Esempi:
-- `profilo.completato`
-- `annuncio.creato`
-- `utente.registrato`
+🔁 Centralized Core Updates (Key Feature)
 
----
+Maravel Framework includes a centralized core update system, designed to manage multiple projects based on the same framework.
 
-## 🔁 Update centralizzati del Core (Feature chiave)
+With a single command you can:
+	•	Scan the entire Core
+	•	Generate a structured representation (core.json)
+	•	Update shared files
+	•	Automatically distribute the updated core to all child projects
 
-Maravel Framework include un **sistema di aggiornamento centralizzato del core**, pensato per gestire **più progetti basati sullo stesso framework**.
-
-Con un solo comando è possibile:
-
-- Scansionare l’intero Core
-- Generare una rappresentazione strutturata (`core.json`)
-- Aggiornare i file condivisi
-- Distribuire automaticamente il core aggiornato a tutti i progetti figli
-
-### Comando
-
+Command
 ```bash
 php build-core-json.php
 
-✅ Framework core scansionato
-✅ MyFiles aggiornato
-✅ core.json generato
+✅ Framework core scanned
+✅ MyFiles updated
+✅ core.json generated
+```
+Benefits
+	•	🔁 Update the core only once
+	•	🧩 No impact on App/ or plugins
+	•	🚀 Continuous framework evolution
+	•	🛡️ Reduced errors and project divergence
+	•	🏢 Ideal for SaaS platforms, multi-site portals, and agencies
 
-Vantaggi
-	•	🔁 Aggiorni il core una sola volta
-	•	🧩 Nessun impatto su App/ o plugin
-	•	🚀 Evoluzione continua del framework
-	•	🛡️ Riduzione errori e divergenze tra progetti
-	•	🏢 Ideale per SaaS, portali multipli, agenzie
+⸻
 
 🧪 CLI
 
-Maravel include un entry point CLI (cli.php) per:
-	•	Migrazioni
-	•	Operazioni di manutenzione
-	•	Script interni
-	•	Task automatizzati
+Maravel includes a dedicated CLI entry point (cli.php) for:
+	•	Migrations
+	•	Maintenance operations
+	•	Internal scripts
+	•	Automated tasks
 
-Espandibile nel tempo con comandi custom.
+Easily extensible with custom commands.
 
-🔐 Sicurezza
-	•	Protezione da accessi diretti
-	•	Auth centralizzato
+⸻
+
+🔐 Security
+	•	Protection against direct access
+	•	Centralized authentication
 	•	Session handling
-	•	Separazione aree pubbliche / private
+	•	Public / private area separation
 
-(Estendibile con CSRF, rate limiting, middleware, ecc.)
+(Extendable with CSRF protection, rate limiting, middleware, etc.)
 
-⚙️ Requisiti
+⸻
+
+⚙️ Requirements
 	•	PHP ≥ 8.3
-	•	Estensioni PHP comuni (PDO, JSON, mbstring)
+	•	Common PHP extensions (PDO, JSON, mbstring)
 	•	Composer
-	•	Database MySQL / MariaDB
+	•	MySQL / MariaDB database
 
-🛣️ Roadmap (in evoluzione)
+⸻
+
+🛣️ Roadmap (Evolving)
 	•	Middleware system
 	•	Response object
 	•	Validation layer
 	•	Dependency Injection Container
-	•	Versioning del core
-	•	Update differenziali e rollback
+	•	Core versioning
+	•	Differential updates and rollback
 	•	API / JSON mode
 
-🧠 Filosofia
+⸻
 
-Maravel nasce da progetti reali, non da tutorial.
+🧠 Open Source Philosophy
 
-È pensato per:
-	•	Portali custom
-	•	SaaS verticali
-	•	Gestionali
-	•	Progetti multi-cliente
-	•	Chi vuole controllo totale senza over-engineering
+Maravel Framework is open source and actively developed in real-world projects.
 
+The core framework is public by design.
+Business logic, client-specific modules, and commercial plugins are intentionally kept private.
 
-👤 Autore
+This ensures:
+	•	a stable and evolving core
+	•	transparency
+	•	freedom to extend Maravel in any direction
+
+⸻
+
+👤 Author
 
 Marco Dattisi
-Ingegnere informatico / Web developer
-
+Software Engineer / Web Developer
