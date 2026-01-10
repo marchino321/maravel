@@ -1,0 +1,246 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{ Titolo }}
+{% endblock %}
+
+{% block Body %}
+<style>
+  .sticky-docs {
+    position: sticky;
+    top: 0px;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    overflow-x: auto;
+  }
+
+  pre code {
+    color: inherit;
+  }
+</style>
+
+<div class="row">
+
+  <!-- SIDEBAR -->
+  <div class="col-md-3">
+    <div class="card shadow-sm sticky-docs">
+      <div class="card-body p-2">
+        <div class="fw-bold text-muted mb-2">Query Builder</div>
+
+        <div class="nav flex-column nav-pills">
+          <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#qb-insert">
+            ➕ Insert
+          </button>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-select">
+            🔍 Select
+          </button>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-update">
+            ✏️ Update
+          </button>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-delete">
+            🗑 Delete
+          </button>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-duplicate">
+            🚫 Controllo doppi
+          </button>
+
+          <hr>
+
+          <div class="fw-bold text-muted mt-2">Tools</div>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-crypter">
+            🔐 Crypter
+          </button>
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#qb-upload">
+            📤 Upload file
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="col-md-9">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="tab-content">
+
+          <!-- INSERT -->
+          <div class="tab-pane fade show active" id="qb-insert">
+            <h5>Insert record</h5>
+            <p class="text-muted small">Inserimento dati e ritorno ID</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Chiamate;
+
+$c = new Chiamate();
+
+$data = [
+  'nome'  => $nome,
+  'email' => $email,
+  'stato' => 1
+];
+
+$lastId = $c->salva('utenti', $data);
+
+var_export($c->GetError());
+            </code></pre>
+          </div>
+
+          <!-- SELECT -->
+          <div class="tab-pane fade" id="qb-select">
+            <h5>Select record</h5>
+            <p class="text-muted small">Select semplice con AND / JOIN</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Chiamate;
+
+$c = new Chiamate();
+
+$and = [
+  'stato' => 1
+];
+
+$join = [
+  'ruoli' => [
+    'JOIN' => 'LEFT',
+    'ruoli.id' => 'utenti.id_ruolo'
+  ]
+];
+
+$rows = $c->seleziona(
+  'utenti',
+  'id',
+  $idUtente,
+  $and,
+  $join
+);
+
+var_export($c->GetError());
+            </code></pre>
+          </div>
+
+          <!-- UPDATE -->
+          <div class="tab-pane fade" id="qb-update">
+            <h5>Update record</h5>
+            <p class="text-muted small">Aggiornamento dati per ID</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Chiamate;
+
+$c = new Chiamate();
+
+$data = [
+  'email' => $email,
+  'stato' => 0
+];
+
+$ok = $c->aggiorna(
+  'utenti',
+  $data,
+  'id',
+  $idUtente
+);
+
+var_export($c->GetError());
+            </code></pre>
+          </div>
+
+          <!-- DELETE -->
+          <div class="tab-pane fade" id="qb-delete">
+            <h5>Delete record</h5>
+            <p class="text-muted small">Cancellazione per ID</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Chiamate;
+
+$c = new Chiamate();
+
+$affected = $c->Cancella(
+  'utenti',
+  'id',
+  $idUtente
+);
+
+var_export($c->GetError());
+            </code></pre>
+          </div>
+
+          <!-- DUPLICATI -->
+          <div class="tab-pane fade" id="qb-duplicate">
+            <h5>Controllo duplicati</h5>
+            <p class="text-muted small">Ricerca case-insensitive</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Chiamate;
+
+$c = new Chiamate();
+
+$found = $c->DoppiDinamica(
+  'utenti',
+  'email',
+  $email
+);
+
+var_export($c->GetError());
+            </code></pre>
+          </div>
+
+          <!-- CRYPTER -->
+          <div class="tab-pane fade" id="qb-crypter">
+            <h5>Crypter</h5>
+            <p class="text-muted small">Encrypt / Decrypt sicuro</p>
+
+            <pre><code class="language-php">
+use Core\Classes\Crypter;
+
+$secret = 'password-segreta';
+
+$crypted = Crypter::encrypt(
+  'Marco Dattisi',
+  $secret
+);
+
+$clear = Crypter::decrypt(
+  $crypted,
+  $secret
+);
+            </code></pre>
+          </div>
+
+          <!-- UPLOAD -->
+          <div class="tab-pane fade" id="qb-upload">
+            <h5>Upload file</h5>
+            <p class="text-muted small">Upload controllato con validazioni</p>
+
+            <pre><code class="language-php">
+use MarcoUpload\MarcoUpload;
+
+$upload = new MarcoUpload($_SERVER['DOCUMENT_ROOT']);
+
+$path = $upload->upload($_FILES['file'], [
+  'move' => '/uploads/',
+  'size' => 2000000,
+  'type' => ['jpg','png']
+]);
+
+if (!$upload->getErros()) {
+  echo $path;
+} else {
+  var_export($upload->getErros());
+}
+            </code></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ Titolo }}{% endblock %}
+
+{% block Body %}
+<div class="container-fluid">
+
+
+
+  <div class="card ombra mb-3">
+    <div class="card-body">
+      <h5>Controller API base</h5>
+      <pre><code class="language-php">
+namespace App\Controllers\Api\V1;
+
+use Core\BaseApiController;
+
+class Clienti extends BaseApiController
+{
+  public function elenco(): void
+  {
+    $this->success([
+      "id" => 1,
+      "nome" => "Mario"
+    ]);
+  }
+}
+</code></pre>
+    </div>
+  </div>
+
+  <div class="card ombra mb-3">
+    <div class="card-body">
+      <h5>Risposta errore</h5>
+      <pre><code class="language-php">
+$this->error("AUTH_401", "Non autorizzato");
+</code></pre>
+    </div>
+  </div>
+
+  <div class="card ombra">
+    <div class="card-body">
+      <h5>Chiamata JS</h5>
+      <pre><code class="language-js">
+fetch("/api/v1/clienti/elenco")
+  .then(r => r.json())
+  .then(console.log);
+</code></pre>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

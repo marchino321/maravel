@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block title %}
+{{ Titolo ?? 'Documentazione Framework' }}
+{% endblock %}
+
+{% block Body %}
+
+<div class="container-fluid">
+
+  <!-- HEADER DOCUMENTAZIONE -->
+  <div class="card ombra mb-4">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+        <div>
+          <h2 class="mb-1">📚 Documentazione Framework</h2>
+          <p class="text-muted mb-0">
+            Guida tecnica, esempi pronti e strumenti di supporto allo sviluppo.
+          </p>
+        </div>
+
+        <!-- TOOL BUTTONS -->
+        <div class="d-flex flex-wrap gap-2">
+
+          <a href="/private/docs-controller/query-builder" class="btn btn-outline-primary">
+            🗄 Query Builder
+          </a>
+
+          <a href="/private/docs-controller/ajax" class="btn btn-outline-success">
+            ⚡ AJAX Snippets
+          </a>
+
+          <a href="/private/docs-controller/api" class="btn btn-outline-danger">
+            🔐 API
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEZIONI PRINCIPALI -->
+  <div class="row g-3">
+
+    <!-- CORE -->
+    <div class="col-md-4">
+      <div class="card ombra h-100">
+        <div class="card-body">
+          <h5>⚙️ Core</h5>
+          <ul class="mb-0 small">
+            <li>Bootstrap & Config</li>
+            <li>Router</li>
+            <li>Controller</li>
+            <li>Event System</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW & UI -->
+    <div class="col-md-4">
+      <div class="card ombra h-100">
+        <div class="card-body">
+          <h5>🎨 View & UI</h5>
+          <ul class="mb-0 small">
+            <li>Twig</li>
+            <li>Template</li>
+            <li>Assets CSS / JS</li>
+            <li>FormHelper</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISTEMI -->
+    <div class="col-md-4">
+      <div class="card ombra h-100">
+        <div class="card-body">
+          <h5>🧩 Sistemi</h5>
+          <ul class="mb-0 small">
+            <li>AJAX</li>
+            <li>API</li>
+            <li>Plugin</li>
+            <li>Update & Backup</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER NOTE -->
+  <div class="text-muted small mt-4">
+    💡 Tutti gli esempi sono copiabili e pensati per uso immediato.
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block Script %}{% endblock %}

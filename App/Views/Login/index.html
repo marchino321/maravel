@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}Login{% endblock %}
+{% block css %} 
+    <style>
+/* Se siamo sulla pagina di login */
+/* Quando non c'è sidebar */
+body{
+    height: 100vh;
+}
+.no-sidebar .content-page,
+.no-sidebar footer.footer {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+/* Footer login full width */
+.no-sidebar footer.footer {
+    position: absolute; /* non più absolute */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2c333e;
+    color: #adb5bd;
+    padding: 19px 15px 20px;
+}
+        </style>
+{% endblock %}
+{% block NoLogin %} {% endblock %}
+{% block classBody %} no-sidebar {% endblock %}
+{% block Body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4 text-center">
+        <img src="{{Logo_App}}" alt="Logo" class="img-fluid mb-3" style="max-width: 100px;">
+        <div class="card shadow">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Accedi al Sistema</h4>
+                {{'inizio' | startForm("/login/autentica", "false" ) | raw }}
+
+
+
+          
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Accedi</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

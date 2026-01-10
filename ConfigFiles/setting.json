@@ -1,0 +1,15 @@
+{
+    "login": "open",
+    "date_custom": {
+        "serverData": "Y-m-d",
+        "americanaData": "Y\/m\/d",
+        "daInputItalianaData": "d-m-Y",
+        "daInputModzillaData": "d\/m\/Y",
+        "dataMasterPData": "d.m.Y",
+        "serverDataTime": "Y-m-d H:i",
+        "americanaDataTime": "Y\/m\/d H:i",
+        "daInputItalianaDataTime": "d-m-Y H:i",
+        "daInputModzillaDataTime": "d\/m\/Y H:i",
+        "dataMasterPDataTime": "d.m.Y H:i"
+    }
+}

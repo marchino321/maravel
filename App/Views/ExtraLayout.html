@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>{% block Titolo %}Installazione{% endblock %}</title>
+  <link rel="stylesheet" href="/App/public/css/bootstrap-dark.min.css">
+  <link rel="stylesheet" href="/App/public/css/app-dark.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+  <script src="/App/public/libs/twitter-bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script>
+</head>
+
+<body class="no-sidebar">
+  <main class="container">
+    {% block Body %}{% endblock %}
+  </main>
+
+
+  {% block Script %}{% endblock %}
+</body>
+
+</html>

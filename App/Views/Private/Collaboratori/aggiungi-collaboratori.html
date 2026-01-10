@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% block title %}
+	{{ Titolo }}
+{% endblock %}
+{% block css %}{% endblock %}
+{% block Body %}
+	{{'inizio' | startForm(Form, "true") | raw }}
+
+	<div class="row">
+		<div class="col-md-4">
+			<div class="card ombra">
+				<div class="card-body">
+
+					<div class="col-md-12">
+						<center>
+							<img src="{{(avatar) ? avatar : '/App/public/images/users/default.svg' }}" alt="" class="flex-shrink-0 rounded-circle avatar-xl me-3">
+						</center>
+						{{ Upload | raw }}
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-8">
+			<div class="card ombra">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-6 mb-3">
+							{{ nomeUtente | raw }}
+						</div>
+						<div class="col-md-6 mb-3">
+
+							{{ cognomeUtente | raw }}
+						</div>
+						<div class="col-md-6 mb-3">
+							{{ emailUtente | raw }}
+						</div>
+						<div class="col-md-6 mb-3">
+							{{ passwordUtente | raw }}
+						</div>
+					</div>
+					<div class="col-md-12">
+						<button type="submit" class="btn btn-success waves-effect waves-light">
+							<span class="btn-label">
+								<i class="mdi mdi-content-save-all"></i>
+							</span>Salva
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{{'fine' | startForm() | raw }}
+
+{% endblock %}
+
+{% block Script %}
+
+	<script type="text/javascript">
+		$(document).ready(() => {})
+	</script>
+
+{% endblock %}

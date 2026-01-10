@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ Titolo }}{% endblock %}
+
+{% block Body %}
+<div class="container-fluid">
+
+
+
+  <div class="card ombra mb-3">
+    <div class="card-body">
+      <h5>POST AJAX standard</h5>
+      <pre><code class="language-js">
+AjaxHelper.post("/private/endpoint", {
+  id: 5,
+  nome: "Mario"
+}).then(resp => {
+  console.log(resp);
+});
+</code></pre>
+    </div>
+  </div>
+
+  <div class="card ombra mb-3">
+    <div class="card-body">
+      <h5>Form AJAX automatico</h5>
+      <pre><code class="language-html">
+<form class="ajax-form" action="/private/save" method="post">
+  &lt;input type="text" name="nome"&gt;
+  &lt;button&gt;Salva&lt;/button&gt;
+</form>
+</code></pre>
+    </div>
+  </div>
+
+  <div class="card ombra">
+    <div class="card-body">
+      <h5>Redirect automatico</h5>
+      <pre><code class="language-php">
+return $this->jsonResponse(true, "OK", [
+  "redirect" => "/private/dashboard"
+]);
+</code></pre>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

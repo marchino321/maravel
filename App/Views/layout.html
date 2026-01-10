@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} | {{ NomeApp | default('Gestionale in Costruzione') }}</title>
+
+    {# Header comune #}
+    {% set Header = include('includesTemplate/header.html') %}
+    {{ Header | raw }}
+
+    {# ===================== CSS ===================== #}
+    {% if css_files is defined %}
+        {% for css in css_files %}
+            <link rel="stylesheet" href="{{ css.url }}" id="{{ css.id }}">
+        {% endfor %}
+    {% endif %}
+
+    {# ===================== JS HEAD ===================== #}
+    {% if js_head_files is defined %}
+        {% for js in js_head_files %}
+            <script src="{{ js.file }}" id="{{ js.id }}"></script>
+        {% endfor %}
+    {% endif %}
+
+    {# Extra CSS specifici della pagina #}
+    {% block css %}{% endblock %}
+</head>
+
+<body class="loading {% block classBody %}{% endblock %}" 
+      data-layout='{{ DefaultSetting|default("{\"mode\":\"light\",\"width\":\"fluid\",\"menuPosition\":\"fixed\",\"sidebar\":{\"color\":[\"dark\"]},\"topbar\":{\"color\":[\"dark\"]},\"showRightSidebarOnPageLoad\":true}")|raw }}'>
+
+    {# Loader #}
+    {% set Loader = include('includesTemplate/loader.html') %}
+    {{ Loader | raw }}
+
+    <!-- Inizio Pagina -->
+    <div id="wrapper">
+        {% block NoLogin %}
+            {# Navbar #}
+            {% set NavBar = include('includesTemplate/navbar.html') %}
+            {{ NavBar | raw }}
+
+            {# Sidebar #}
+            {% set SideBar = include('includesTemplate/sidebar.html') %}
+            {{ SideBar | raw }}
+        {% endblock %}
+
+        <div class="content-page">
+            <div class="content">
+                <div class="container-fluid">
+
+                    <div id="messaggiAjax">
+                        {% if debug %}
+                        {# <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show ombra"
+                            role="alert">
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <h4 class="alert-heading">Modalità Debug attivata</h4>
+                            <p>In questo momento un tecnico sta lavorando al software, potrebbero esserci problemi sui salvataggi e caricamento pagine.</p>
+                            <p>Tutto tornerà alla normalità il prima possibile.</p>
+                            <p class="mb-0">Ci scusiamo per il disagio!</p>
+                        </div> #}
+                        {% endif %}
+                    </div>
+
+                    {# Contenuto principale #}
+                    {% block Body %}{% endblock %}
+                </div>
+
+                {# Footer #}
+                <footer class="footer">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                &copy; 2005 - <script>document.write(new Date().getFullYear())</script> {{ design_footer }}
+                                <a href="{{ link_footer }}" target="_blank">{{ label_link }}</a>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-md-end footer-links d-none d-sm-block">
+                                    {# eventuali link aggiuntivi #}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    {# ===================== JS FOOTER ===================== #}
+    {% if js_files is defined %}
+        {% for js in js_files %}
+            <script src="{{ js.file }}" id="{{ js.id }}"></script>
+        {% endfor %}
+    {% endif %}
+
+    {# Inline JS (registrati direttamente) #}
+    {% if inline_js is defined %}
+        {% for js in inline_js %}
+            <script>{{ js|raw }}</script>
+        {% endfor %}
+    {% endif %}
+
+    {# JS specifici della pagina #}
+    {% block Script %}{% endblock %}
+
+    {# Footer comune #}
+    {% set Footer = include('includesTemplate/footer.html') %}
+    {{ Footer | raw }}
+
+    {{ render_assets() | raw }}
+
+    {# Debug console opzionale #}
+    {% if sessione.idUtenteAutoIncrement == 1 %}
+        {{ render_console_logs() | raw }}
+    {% endif %}
+<script>
+	window.CSRF_TOKEN = "{{ csrf_token() }}";
+</script>
+
+</body>
+</html>

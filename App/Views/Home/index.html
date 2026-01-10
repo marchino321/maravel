@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block Body %}
+<h1>Index</h1>
+<p>La pagina "{{ url }}" </p>
+<a href="/">Torna alla home</a><br />
+{{ params | join(", ")}}
+<p>{{ message }}</p>
+
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'layout.html' %}
+{% block title %} {{ Titolo }} {% endblock %}
+
+{% block Body %}
+<style>
+  .header-success {
+    background: linear-gradient(135deg, #16c469, #2dd88f);
+    color: #fff;
+  }
+
+  .header-primary {
+    background: linear-gradient(135deg, #71b6f9, #4a9df8);
+    color: #fff;
+  }
+
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+    border: none;
+  }
+
+  .card-header {
+    font-weight: 600;
+    letter-spacing: .5px;
+    padding: 12px 16px;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 18px 10px;
+  }
+
+  .stat-card .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .stat-card .label {
+    font-size: .8rem;
+    text-transform: uppercase;
+    opacity: .8;
+  }
+
+  .system-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .system-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(0, 0, 0, .1);
+    font-size: .9rem;
+  }
+
+  .system-list li:last-child {
+    border-bottom: none;
+  }
+
+  .table thead th {
+    background: #f5f7fa;
+    text-transform: uppercase;
+    font-size: .75rem;
+  }
+
+  iframe {
+    border-radius: 8px;
+    border: none;
+  }
+</style>
+<div class="row">
+  {% for i in 1..4 %}
+  <div class="col-md-3 form-group">
+    <div class="card">
+      <div class="card-header header-success text-uppercase">
+        Stat {{ i }}
+      </div>
+      <div class="card-body stat-card">
+        <div class="value">--</div>
+        <div class="label">Valore</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="row">
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header header-primary text-uppercase">
+        Informazioni Sistema
+      </div>
+      <div class="card-body" style="height:400px; overflow:auto;">
+        <ul class="system-list">
+          <li><span>VPS</span><strong>{{ data.Nome_Host }} {{ Server_Software }}</strong></li>
+          <li><span>OS</span><strong>{{ data.Sistema_Operativo }}</strong></li>
+          <li><span>Disco Totale</span><strong>{{ data.Disco_Totale }}</strong></li>
+          <li><span>Disco Usato</span><strong>{{ data.Disco_Usato }}</strong></li>
+          <li><span>Disco Libero</span><strong>{{ data.Disco_Libero }}</strong></li>
+          <li><span>RAM Totale</span><strong>{{ data.RAM_Totale }}</strong></li>
+          <li><span>RAM Usata</span><strong>{{ data.RAM_Usata }}</strong></li>
+          <li><span>RAM Libera</span><strong>{{ data.RAM_Libera }}</strong></li>
+          <li><span>PHP</span><strong>{{ data.PHP_Versione }}</strong></li>
+          <li><span>Architettura</span><strong>{{ data.Architettura }}</strong></li>
+          <li><span>IP Server</span><strong>{{ data.IP_Server }}</strong></li>
+          <li><span>CPU</span><strong>{{ data.Numero_CPU }}</strong></li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card mb-3">
+      <div class="card-body">
+
+        <h5 class="mb-3">🔄 Aggiorna Core Framework</h5>
+
+        <form id="buildCoreForm">
+          <div class="input-group mb-2">
+            <input type="text" name="version" class="form-control" placeholder="Versione es. 1.0.1" required>
+            <button class="btn btn-success" type="submit">
+              🚀 Genera core.json
+            </button>
+          </div>
+        </form>
+
+        <pre id="buildCoreOutput" class="bg-dark text-light p-3 rounded d-none"
+          style="max-height:300px; overflow:auto;"></pre>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+{% block Script %}
+<script>
+  document.getElementById('buildCoreForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const outputBox = document.getElementById('buildCoreOutput');
+    const btn = form.querySelector('button');
+
+    outputBox.classList.remove('d-none');
+    outputBox.textContent = "⏳ Esecuzione in corso...\n";
+    outputBox.classList.remove('text-danger', 'text-success');
+    btn.disabled = true;
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    AjaxHelper.post(
+      '/private/super-admin/build-core-ajax',
+      data,
+      {},
+      false // niente loader globale
+    )
+      .then(response => {
+
+        if (!response || typeof response !== 'object') {
+          throw 'Risposta non valida dal server';
+        }
+
+        if (response.data.status === 'ok') {
+          outputBox.textContent = response.data.output || '✅ Operazione completata correttamente';
+          outputBox.classList.remove('text-danger');
+          outputBox.classList.add('text-success');
+        } else {
+          outputBox.textContent = response.data.output || '❌ Errore durante l’operazione';
+          outputBox.classList.remove('text-success');
+          outputBox.classList.add('text-danger');
+        }
+
+      })
+      .catch(error => {
+        outputBox.textContent = "❌ Errore AJAX\n" + error;
+        outputBox.classList.add('text-danger');
+      })
+      .finally(() => {
+        btn.disabled = false;
+      });
+  });
+</script>
+{% endblock %}

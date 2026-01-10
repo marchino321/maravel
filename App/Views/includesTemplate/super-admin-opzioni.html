@@ -1,0 +1,28 @@
+{% for voce in headerMenu %}
+	<li class="dropdown notification-list topbar-dropdown">
+		<a class="nav-link dropdown-toggle waves-effect waves-light" href="{{ voce.url }}" {% if voce.children is not empty %} data-bs-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false" {% endif %}>
+
+			{% if voce.icon %}
+				<i class="{{ voce.icon }}"></i>&nbsp;
+			{% endif %}
+			<span>{{ voce.label }}</span>
+			{% if voce.children is not empty %}
+				<i class="mdi mdi-chevron-down"></i>
+			{% endif %}
+		</a>
+
+		{% if voce.children is not empty %}
+			<div class="dropdown-menu dropdown-menu-end profile-dropdown">
+				{% for child in voce.children %}
+					<a href="{{ child.url }}" class="dropdown-item notify-item">
+						{% if child.icon %}
+							<i class="{{ child.icon }}"></i>&nbsp;
+
+						{% endif %}
+						<span>{{ child.label }}</span>
+					</a>
+				{% endfor %}
+			</div>
+		{% endif %}
+	</li>
+{% endfor %}

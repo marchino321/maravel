@@ -1,0 +1,282 @@
+{% extends "ExtraLayout.html" %}
+
+{% block title %}{{ Titolo }}{% endblock %}
+{% block NoLogin %}{% endblock %}
+{% block classBody %} no-sidebar bg-dark text-light {% endblock %}
+
+{% block Body %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+
+
+
+      {# ===============================
+      🔍 VERIFICA COMPATIBILITÀ
+      =============================== #}
+
+      {% set canInstall =
+      reqs.php.ok
+      and reqs.mysql.enabled
+      and reqs.composer.installed
+      %}
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+
+          <h5 class="mb-3">🧪 Verifica requisiti di sistema</h5>
+
+          <div class="row g-3">
+
+            <div class="col-md-3">
+              <div class="border rounded p-3 text-center">
+                <div class="fw-semibold">PHP</div>
+                <div class="small text-muted">{{ reqs.php.version }}</div>
+                {% if reqs.php.ok %}
+                <span class="text-success mt-2">Compatibile</span>
+                {% else %}
+                <span class="text-danger mt-2">Non compatibile</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="border rounded p-3 text-center">
+                <div class="fw-semibold">MySQLi</div>
+                <div class="small text-muted">Estensione PHP</div>
+                {% if reqs.mysql.enabled %}
+                <span class="text-success mt-2">Attiva</span>
+                {% else %}
+                <span class="text-danger mt-2">Mancante</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="border rounded p-3 text-center">
+                <div class="fw-semibold">Composer</div>
+                <div class="small text-muted">Dipendenze</div>
+                {% if reqs.composer.installed %}
+                <span class="text-success mt-2">Presente</span>
+                {% else %}
+                <span class="text-danger mt-2">Non trovato</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="border rounded p-3 text-center">
+                <div class="fw-semibold">SSL</div>
+                <div class="small text-muted">HTTPS</div>
+                {% if reqs.ssl.enabled %}
+                <span class="text-success mt-2">Attivo</span>
+                {% else %}
+                <span class="text-warning mt-2">Non attivo</span>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      {% if not canInstall %}
+      <div class="alert alert-danger mb-4">
+        ❌ Il sistema non soddisfa tutti i requisiti minimi.
+        <br>
+        Correggi i punti evidenziati prima di procedere con l’installazione.
+      </div>
+      {% endif %}
+
+      {# ===============================
+      🧙‍♂️ WIZARD INSTALLAZIONE
+      =============================== #}
+
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+
+          {% if messaggio %}
+          <div class="alert alert-info mb-4">
+            {{ messaggio | raw }}
+          </div>
+          {% endif %}
+
+          <form method="post" {% if not canInstall %}class="opacity-50" {% endif %}>
+            <input type="hidden" name="action" value="install">
+
+            <!-- TAB NAV -->
+            <ul class="nav nav-tabs nav-bordered nav-justified mb-4" id="installTabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#tab-db" data-bs-toggle="tab">
+                  🗄 Database
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#tab-app" tabindex="-1">
+                  ⚙️ Applicazione
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#tab-api" tabindex="-1">
+                  🔐 API
+                </a>
+              </li>
+            </ul>
+
+            <!-- TAB CONTENT -->
+            <div class="tab-content">
+
+              <!-- DATABASE -->
+              <div class="tab-pane fade show active" id="tab-db">
+                <div class="mb-3">
+                  <label class="form-label">Host Database *</label>
+                  <input type="text" name="db_host" class="form-control" value="localhost" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Nome Database *</label>
+                  <input type="text" name="db_name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Utente Database *</label>
+                  <input type="text" name="db_user" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Password Database *</label>
+                  <input type="password" name="db_pass" class="form-control" required>
+                </div>
+
+                <div class="d-grid mt-4">
+                  <button type="button" class="btn btn-success js-next" data-target="#tab-app" {% if not canInstall
+                    %}disabled{% endif %}>
+                    Avanti →
+                  </button>
+                </div>
+              </div>
+
+              <!-- APPLICAZIONE -->
+              <div class="tab-pane fade" id="tab-app">
+                <div class="mb-3">
+                  <label class="form-label">Nome Applicazione *</label>
+                  <input type="text" name="site_name" class="form-control" value="Gestionale" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">ABS_KEY *</label>
+                  <input type="text" name="abs_key" class="form-control" value="UNIQUE2026" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Logo Applicazione *</label>
+                  <input type="text" name="logo_app" class="form-control"
+                    value="/App/public/logo/26892b67838e@1634378965.png" required>
+                </div>
+
+                <div class="alert alert-secondary small">
+                  Il sistema genererà automaticamente:
+                  <ul class="mb-0">
+                    <li>SALT di sicurezza</li>
+                    <li>LinkMain HTTPS</li>
+                  </ul>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-warning js-prev" data-target="#tab-db">
+                    ← Indietro
+                  </button>
+                  <button type="button" class="btn btn-success js-next" data-target="#tab-api" {% if not canInstall
+                    %}disabled{% endif %}>
+                    Avanti →
+                  </button>
+                </div>
+              </div>
+
+              <!-- API -->
+              <div class="tab-pane fade" id="tab-api">
+                <div class="mb-3">
+                  <label class="form-label">Header API (uno per riga) *</label>
+                  <textarea name="header_api" rows="4" class="form-control" required>API-KEY-1
+API-KEY-2
+API-KEY-3</textarea>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-warning js-prev" data-target="#tab-app">
+                    ← Indietro
+                  </button>
+                  <button type="submit" class="btn btn-success" {% if not canInstall %}disabled{% endif %}>
+                    🚀 Avvia Installazione
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <small class="text-muted">🛠 Installer Framework Gestionale</small>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block Script %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    function enableTab(tabId) {
+      const link = document.querySelector('.nav-link[href="' + tabId + '"]');
+      if (!link) return;
+      link.classList.remove('disabled');
+      link.removeAttribute('tabindex');
+    }
+
+    function goToTab(tabId) {
+      const trigger = document.querySelector('.nav-link[href="' + tabId + '"]');
+      if (!trigger || trigger.classList.contains('disabled')) return;
+      new bootstrap.Tab(trigger).show();
+    }
+
+    function validateTab(tabPane) {
+      let valid = true;
+      tabPane.querySelectorAll('[required]').forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('is-invalid');
+          valid = false;
+        } else {
+          input.classList.remove('is-invalid');
+        }
+      });
+      return valid;
+    }
+
+    document.querySelectorAll('.js-next').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const currentTab = btn.closest('.tab-pane');
+        const targetTab = btn.dataset.target;
+        if (!validateTab(currentTab)) {
+          currentTab.querySelector('.is-invalid')?.focus();
+          return;
+        }
+        enableTab(targetTab);
+        goToTab(targetTab);
+      });
+    });
+
+    document.querySelectorAll('.js-prev').forEach(btn => {
+      btn.addEventListener('click', () => {
+        goToTab(btn.dataset.target);
+      });
+    });
+
+  });
+</script>
+{% endblock %}

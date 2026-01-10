@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %} {{Titolo}} {% endblock %}
+
+{% block Body %}
+
+<div class="card ombra">
+  <div class="card-body">
+    <h3>🔄 Aggiornamenti Sistema</h3>
+    {{ messaggio | raw}}
+    {% if core.update_available %}
+    <div class="alert alert-warning">
+      È disponibile un aggiornamento.<br>
+      <b>Versione attuale:</b> {{ core.current }}<br>
+      <b>Ultima versione:</b> {{ core.latest }}
+      {% if core.patches is not empty %}
+      <ul>
+        {% for patch in core.patches %}
+        <li>{{ patch }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+    </div>
+    <form method="get" action="/private/super-admin/apply-core-update">
+      <button class="btn btn-primary">Applica aggiornamento</button>
+    </form>
+    {% else %}
+    <div class="alert alert-success">
+      ✅ Il sistema è aggiornato (versione {{ core.current }}).
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

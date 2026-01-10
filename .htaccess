@@ -1,0 +1,39 @@
+# --- Forza HTTPS ---
+RewriteEngine On
+
+# Se la connessione non è HTTPS, redireziona alla versione HTTPS
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# --- Abilita Rewrite ---
+RewriteBase /
+
+<FilesMatch "^(?!core\.json$).*\.(env|config\.php|json|log)$">
+    Require all denied
+</FilesMatch>
+
+# --- Blocca accesso diretto a Core o App ---
+RewriteRule ^(Core|App)/ - [F,L]
+
+# --- Se il file o la cartella esiste, servilo normalmente ---
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# --- Tutto il resto va a index.php (MVC routing) ---
+RewriteRule ^ index.php [QSA,L]
+
+# --- Sicurezza e cache base ---
+AddDefaultCharset UTF-8
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Options -Indexes
+
+# --- Cache per file statici ---
+<FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+</FilesMatch>

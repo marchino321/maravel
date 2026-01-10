@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %} Esporta Progetto {% endblock %}
+
+{% block Body %}
+<div class="card ombra">
+  <div class="card-body">
+    <h3>📦 Esporta Progetto</h3>
+    <p class="text-muted">Scegli come esportare il progetto e/o il database.</p>
+    {% if zipPath is defined and zipPath %}
+    <div class="alert alert-success d-flex align-items-center justify-content-between">
+      <span>
+        📦 Backup creato:
+        <strong>{{ zipPath }}</strong>
+      </span>
+
+      <a href="{{ zipPath }}" class="btn btn-sm btn-outline-info ms-3" download>
+        ⬇️ Download
+      </a>
+    </div>
+    {% endif %}
+
+    {{ 'inizio' | startForm('/private/super-admin/do-export', "false") | raw }}
+    <div class="mb-3">
+      <label for="tipo_export" class="form-label">Tipo di esportazione</label>
+      <select name="tipo_export" id="tipo_export" class="form-control">
+        <option value="zip">Solo file progetto (ZIP)</option>
+        <option value="zip_db">File progetto + Dump completo DB</option>
+        <option value="zip_db_partial">File progetto + Dump DB parziale (solo alcune tabelle)</option>
+      </select>
+    </div>
+
+    <div class="mb-3" id="tabelle-parziali" style="display:none;">
+      <label class="form-label">Tabelle da includere (dati completi)</label>
+      <input type="text" class="form-control" name="tabelle_incluse" placeholder="es: utenti, ordini, prodotti"
+        value="ap_permessi, tbl_utenti, db_log, ap_ricordaLogin">
+
+      <small class="text-muted">Tutte le altre avranno solo struttura senza record.</small>
+    </div>
+
+    <button class="btn btn-primary mt-3" type="submit">
+      <i class="mdi mdi-cloud-download"></i> Esporta
+    </button>
+    {{ 'fine' | startForm | raw }}
+  </div>
+</div>
+
+<script>
+  document.getElementById("tipo_export").addEventListener("change", function () {
+    document.getElementById("tabelle-parziali").style.display =
+      this.value === "zip_db_partial" ? "block" : "none";
+  });
+</script>
+{% endblock %}
