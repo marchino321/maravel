@@ -1,0 +1,37 @@
+{
+    "dbConfig": {
+        "host": "localhost",
+        "dbname": "gestionale_db",
+        "user": "root",
+        "pass": ""
+    },
+    "HEADER_API": [
+        "ARTE-API-KEY",
+        "58-API-KEY",
+        "STUDIOS-API-KEY"
+    ],
+    "NAMESPACES": {
+        "api": [
+            "App\\Controllers\\Api\\",
+            "api"
+        ],
+        "private": [
+            "App\\Controllers\\Private\\",
+            "private"
+        ],
+        "front": [
+            "App\\Controllers\\",
+            "front"
+        ]
+    },
+    "site_name": "Maravel Framework",
+    "env": "prod",
+    "DEBUG_CONSOLE": true,
+    "Logo_App": "/docs/maravel_logo.webp",
+    "link_footer": "https://marcodattisi.it",
+    "label_link": "Marco Dattisi",
+    "design_footer": "Developing by",
+    "ABS_KEY": "MAR_FRA_20226",
+    "LOGO_APPINTESTAZIONE_PDF": "",
+    "maintenanceMode": false
+}
