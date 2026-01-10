@@ -2,6 +2,8 @@
 
 use App\Config;
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', '0');
 $isCli = (php_sapi_name() === 'cli');
