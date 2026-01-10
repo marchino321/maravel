@@ -68,6 +68,136 @@ A plugin can:
 
 👉 This allows building modular and toggleable features.
 
+🔌 ExamplePlugin
+
+Maravel includes a minimal ExamplePlugin to demonstrate how the plugin system works and how features can be added without touching the Core.
+
+The goal of this plugin is educational: it shows the full lifecycle of a plugin in the simplest possible way.
+
+⸻
+
+📁 Plugin Structure
+
+```text
+App/
+└── Plugins/
+    └── ExamplePlugin/
+        ├── ExamplePlugin.php
+        ├── ExampleController.php
+        └── Views/
+            └── index.html.twig
+```
+🧩 ExamplePlugin.php — Plugin bootstrap
+```php
+<?php
+
+namespace App\Plugins\ExamplePlugin;
+
+use Core\PluginController;
+use Core\Router;
+use Core\EventManager;
+
+class ExamplePlugin extends PluginController
+{
+    public function register(): void
+    {
+        // Register a route provided by the plugin
+        Router::get('/example', [
+            'controller' => ExampleController::class,
+            'action'     => 'index'
+        ]);
+
+        // Hook into a framework event (example)
+        EventManager::on('app.booted', function () {
+            // Custom logic executed when the application boots
+        });
+    }
+}
+```
+This file shows:
+	•	how a plugin is registered
+	•	how routes are defined inside a plugin
+	•	how events can be hooked without modifying the Core
+
+🎮 ExampleController.php — Plugin controller
+
+```php
+
+<?php
+
+namespace App\Plugins\ExamplePlugin;
+
+use Core\Controller;
+
+class ExampleController extends Controller
+{
+    public function index(): void
+    {
+        echo $this->twigManager
+            ->getTwig()
+            ->render('ExamplePlugin/index.html.twig', [
+                'title'   => 'Hello from ExamplePlugin',
+                'message' => 'This page is rendered by a Maravel plugin.'
+            ]);
+    }
+}
+```
+This controller behaves exactly like an App controller, proving that plugins are first-class citizens in Maravel.
+
+🖼️ index.html.twig — Plugin view
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+
+<h1>{{ title }}</h1>
+<p>{{ message }}</p>
+
+<p>
+    This page exists only because the plugin is enabled.
+</p>
+
+</body>
+</html>
+```
+▶️ How to test the plugin
+	1.	Make sure the plugin is enabled (plugins are auto-loaded by default)
+	2.	Start your local development server
+	3.	Open your browser and visit:
+  ```text
+  /example
+  ```
+  You should see a page rendered entirely by the plugin.
+
+🧠 Why plugins matter in Maravel
+
+Plugins allow you to:
+	•	Keep the Core clean and stable
+	•	Encapsulate features
+	•	Enable or disable functionality
+	•	Reuse modules across multiple projects
+	•	Extend the framework without modifying its internals
+
+This approach makes Maravel ideal for long-lived projects, SaaS platforms, and multi-client environments.
+
+⸻
+
+📌 Summary
+
+The ExamplePlugin demonstrates:
+	•	Route registration inside a plugin
+	•	Controller logic isolated from the Core
+	•	Twig rendering from plugin views
+	•	Event-driven extensibility
+
+If you understand this plugin, you understand how Maravel works.
+
+
+
 ⸻
 
 🔔 Event Manager
@@ -81,7 +211,15 @@ Examples:
 	•	profile.completed
 	•	listing.created
 	•	user.registered
+```php
 
+EventManager::dispatch("user.login", $_SESSION);
+
+EventManager::on("user.login", function ($session) {
+  $session['Login'] = true;
+  return $session;
+});
+```
 ⸻
 
 🔁 Centralized Core Updates (Key Feature)
