@@ -316,6 +316,11 @@ This ensures:
 	❤️	transparency
 	❤️	freedom to extend Maravel in any direction
 
+## 📚 Documentation
+
+- [Query Builder & Utilities](docs/documentation.md)
+
+
 
 
 👤 Author
