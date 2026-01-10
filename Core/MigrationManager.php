@@ -59,9 +59,7 @@ class MigrationManager
 
     foreach ($this->getAllMigrations() as $file) {
       $path = $this->migrationDir . '/' . $file;
-      if ($file != "0000_framework_base.php") {
-        continue;
-      }
+
       $migration = require $path;
 
       if (
@@ -131,7 +129,7 @@ class MigrationManager
     }
 
     $cmd = sprintf(
-      'mysqldump --no-data -h%s -u%s -p%s %s > %s',
+      'mysqldump -h%s -u%s -p%s %s > %s',
       escapeshellarg(Config::$dbConfig['host']),
       escapeshellarg(Config::$dbConfig['user']),
       escapeshellarg(Config::$dbConfig['pass']),
