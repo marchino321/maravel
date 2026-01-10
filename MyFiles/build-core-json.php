@@ -1,8 +1,11 @@
 <?php
+
+use App\Config;
+
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', '0');
 $isCli = (php_sapi_name() === 'cli');
-
+$version = '1.0.0';
 if ($isCli) {
   $version = $argv[1] ?? '2.0.0';
 } else {
@@ -13,7 +16,7 @@ if (!preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/', $version)) {
   $version = '2.0.0';
 }
 
-$version = '1.0.0';
+
 
 $patches = [
   "Creazione Sistema MVC custom + API core v0.0.0",
@@ -29,7 +32,7 @@ $patches = [
 $patches = array_reverse($patches);
 
 $isCli = (php_sapi_name() === 'cli');
-$host  = $isCli ? 'hd.marcodattisi.it' : ($_SERVER['HTTP_HOST'] ?? 'localhost');
+$host  = $isCli ? Config::$LinkUpdate : ($_SERVER['HTTP_HOST'] ?? 'localhost');
 $baseUrl = "https://{$host}";
 
 $baseDir    = realpath(__DIR__ . '/../');
