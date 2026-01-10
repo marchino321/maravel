@@ -46,7 +46,7 @@ class Config
   public static string $label_link = "Marco Dattisi";
   public static string $design_footer = "Developing by";
   public static string $LinkMain = "https://hd.marcodattisi.it";
-  public static string $LinkUpdate = "https://hd.marcodattisi.it";
+  public static string $LinkUpdate = "hd.marcodattisi.it";
   public static string $ABS_KEY = "FAMNEST2026";
 
   public static string $LOGO_APPINTESTAZIONE_PDF = "";

@@ -29,7 +29,7 @@ class UpdateManager
   public function __construct()
   {
     $this->versionFile  = Config::$configDir . '/update.json';
-    $this->updateServer = Config::$LinkUpdate . "/MyFiles/core.json";
+    $this->updateServer = 'https://' . Config::$LinkUpdate . "/MyFiles/core.json";
     $this->backupDir    = Config::$baseDir . '/../backups/';
     $this->lockFile     = Config::$baseDir . '/../.update_lock';
   }

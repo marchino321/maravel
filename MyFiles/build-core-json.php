@@ -6,16 +6,20 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', '0');
-$isCli = (php_sapi_name() === 'cli');
-$version = '1.0.0';
+$isCli = (PHP_SAPI === 'cli');
+
 if ($isCli) {
-  $version = $argv[1] ?? '2.0.0';
+  $version = $argv[1] ?? '1.0.0';
 } else {
-  // Web / AJAX
-  $version = $_POST['version'] ?? '2.0.0';
+  $version = $_POST['version'] ?? '1.0.0';
 }
-if (!preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/', $version)) {
-  $version = '2.0.0';
+
+// Normalizza
+$version = trim($version);
+
+
+if (!preg_match('/^\d+\.\d+\.\d+$/', $version)) {
+  $version = '1.0.0';
 }
 
 
@@ -148,7 +152,7 @@ $fixedDirs = [
   'App/Views/Docs',
   'App/Views/Error',
   'App/Plugins/HeaderMenu',
-  'App/Plugins/Base',
+  'App/Plugins/PluginServizio',
 ];
 
 foreach ($fixedDirs as $dir) {

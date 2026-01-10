@@ -260,7 +260,7 @@ class SuperAdmin extends Controller
       http_response_code(403);
       echo json_encode([
         'status' => 'error',
-        'output' => 'Accesso negato'
+        'output' => 'Access denied'
       ]);
       return;
     }
@@ -268,9 +268,8 @@ class SuperAdmin extends Controller
     $version = $_POST['version'] ?? null;
 
     if (!$version) {
-      echo json_encode([
-        'status' => 'error',
-        'output' => 'Versione mancante'
+      $this->jsonResponse(false, [
+        'output' => 'Missing version'
       ]);
       return;
     }
@@ -278,9 +277,8 @@ class SuperAdmin extends Controller
     $cliPath = Config::$baseDir . '/MyFiles/build-core-json.php';
 
     if (!file_exists($cliPath)) {
-      echo json_encode([
-        'status' => 'error',
-        'output' => 'CLI non trovato'
+      $this->jsonResponse(false, [
+        'output' => 'CLI file not found: ' . $cliPath
       ]);
       return;
     }
@@ -291,13 +289,18 @@ class SuperAdmin extends Controller
       escapeshellarg($version)
     );
 
-    exec($cmd, $output, $status);
+    $output = shell_exec($cmd);
 
+    if ($output === null) {
+      $this->jsonResponse(false, [
+        'output' => 'Command execution failed'
+      ]);
+      return;
+    }
 
     $this->jsonResponse(true, [
-      'status' => $status === 0 ? 'ok' : 'error',
-      'output' => implode("\n", $output)
+      'status' => 'ok',
+      'output' => trim($output)
     ]);
-    exit;
   }
 }
