@@ -3,6 +3,7 @@
 namespace Core\Classi;
 
 use App\Config;
+use Core\Lang;
 use Core\View\TwigManager;
 
 // if (!defined("CLI_MODE")) {
@@ -27,37 +28,37 @@ class Flash
     'insert.ok' => [
       'type'  => self::SUCCESS,
       'title' => 'Inserimento',
-      'body'  => 'Inserimento avvenuto con successo.'
+      'body'  => 'insert.ok'
     ],
     'update.ok' => [
       'type'  => self::INFO,
       'title' => 'Modifica',
-      'body'  => 'Modifica completata correttamente.'
+      'body'  => 'update.ok'
     ],
     'field.missing' => [
       'type'  => self::WARNING,
       'title' => 'Campo mancante',
-      'body'  => 'Alcuni campi obbligatori non sono stati compilati.'
+      'body'  => 'field.missing'
     ],
     'no.mail' => [
       'type'  => self::WARNING,
       'title' => 'Email non valida',
-      'body'  => 'Inserisci una email valida'
+      'body'  => 'no.mail'
     ],
     'system.error' => [
       'type'  => self::DANGER,
       'title' => 'Errore',
-      'body'  => 'Si è verificato un errore imprevisto. Riprova più tardi.'
+      'body'  => 'system.error'
     ],
     'db.crash' => [
       'type'  => self::DANGER,
       'title' => '💥 Database',
-      'body'  => 'Errore durante la connessione al database.'
+      'body'  => 'db.crash'
     ],
     'db.install' => [
       'type'  => self::SUCCESS,
       'title' => '💥 Database',
-      'body'  => 'Installazione avvenuta con successo!'
+      'body'  => 'db.install'
     ],
   ];
   public static function AddMex(string $testo, string $type = self::DANGER, string $title = ''): void
@@ -89,7 +90,15 @@ class Flash
     }
 
     $msg = self::$catalog[$key];
-    self::AddMex($msg['body'], $msg['type'], $msg['title']);
+
+    // 🔥 Traduzione QUI (runtime)
+    $body = \Core\Lang::get($msg['body']);
+
+    self::AddMex(
+      $body,
+      $msg['type'],
+      $msg['title']
+    );
   }
 
   public static function GetMex(): array

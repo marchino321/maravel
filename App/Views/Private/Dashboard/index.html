@@ -1,18 +1,21 @@
 {% extends 'layout.html' %}
 {% block title %}
-	{{ Titolo }}
+{{ Titolo }}
 {% endblock %}
 {% block css %}{% endblock %}
-{% block Body %}{% endblock %}
+{% block Body %}
+<h1>{{ __('login.title') }}</h1>
+<p>{{ __('errors.required', {field: 'Email'}) }}</p>
+{% endblock %}
 
 {% block Script %}
 
 <script type="text/javascript">
-$(document).ready(() => {
+  $(document).ready(() => {
 
-	$('#indietro_btn').remove();
+    $('#indietro_btn').remove();
 
-})
+  })
 
 </script>
 

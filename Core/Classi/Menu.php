@@ -24,34 +24,6 @@ class Menu
     Debug::log("MenuManager inizializzato in Menu class", 'MENU');
   }
 
-  /**
-   * Menu SuperAdmin rapido con icone
-   */
-  public function menuSuperAdmin(): void
-  {
-    $superAdminItems = [
-      ['id' => 'super_stats', 'label' => '', 'url' => '/SuperAdmin/Index/SuperUser', 'icon' => 'fe-activity', 'title' => 'Statistiche Iniziali SuperAdmin'],
-      ['id' => 'super_migration', 'label' => '', 'url' => '/SuperAdmin/Migration/SuperUser', 'icon' => 'fe-database', 'title' => 'Migrazioni'],
-      ['id' => 'super_coding', 'label' => '', 'url' => '/SuperAdmin/Coding/SuperUser', 'icon' => 'fe-code', 'title' => 'Documentazione Codice'],
-      ['id' => 'example_form', 'label' => '', 'url' => '/home/esempioform', 'icon' => 'fe-layout', 'title' => 'Esempio di inserimento'],
-      ['id' => 'export_db_true', 'label' => '', 'url' => '/installa/ExportDB/SuperUser?db=true', 'icon' => 'fe-download-cloud', 'title' => 'Esporta Progetto'],
-      ['id' => 'export_db', 'label' => '', 'url' => '/installa/ExportDB/SuperUser', 'icon' => 'fe-download', 'title' => 'Crea nuova migrazione'],
-      ['id' => 'date_pattern', 'label' => '', 'url' => '/SuperAdmin/DatePattern/SuperUser', 'icon' => 'fe-calendar', 'title' => 'Pattern Date'],
-    ];
-
-    foreach ($superAdminItems as $item) {
-      $this->menuManager->addMenuItem(
-        $item['id'],
-        $item['label'],
-        $item['url'],
-        [], // ruoli SuperAdmin
-        10,
-        null
-      );
-    }
-
-    Debug::log("Menu SuperAdmin generato", 'MENU');
-  }
 
   /**
    * Menu Admin principale con figli
@@ -67,7 +39,7 @@ class Menu
     // Dashboard
     $this->menuManager->addMenuItem(
       'dashboard',
-      'Dashboard',
+      'menu.dashboard',
       '/private/dashboard',
       [],
       1,
@@ -75,28 +47,30 @@ class Menu
       'mdi mdi-view-dashboard'
     );
 
-    // Collaboratori
+    // Collaboratori (parent)
     $this->menuManager->addMenuItem(
       'collaboratori',
-      'Collaboratori',
+      'menu.collaboratori',
       '#',
       ['Admin'],
       100,
       null,
       'mdi mdi-account-group'
     );
+
     $this->menuManager->addMenuItem(
       'collaboratori_elenco',
-      'Elenco',
+      'menu.collaboratori.elenco',
       '/private/collaboratori/elenco-collaboratori',
       ['Admin'],
       1,
       'collaboratori',
       'mdi mdi-account-box-multiple'
     );
+
     $this->menuManager->addMenuItem(
       'collaboratori_aggiungi',
-      'Aggiungi',
+      'menu.collaboratori.aggiungi',
       '/private/collaboratori/aggiungi-modifica-collaboratore',
       ['Admin'],
       2,

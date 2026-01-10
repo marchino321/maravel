@@ -52,8 +52,8 @@ $(document).ready(function () {
 	{% for msg in messages %}
 		{% set type = msg.type|default('info') %}
 		toastr["{{ type }}"](
-		            "{{ msg.body|default(msg|join(', ')) }}",
-		            "{{ msg.title|default('N/D') }}"
+		            "{{ __(msg.body)|default(msg|join(', ')) }}",
+		            "{{ __(msg.title)|default('N/D') }}"
 		        );
 	{% endfor %}
 	{{ clear_flash_messages() }}

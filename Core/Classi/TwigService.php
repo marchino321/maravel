@@ -83,6 +83,9 @@ class TwigService
     $twig->addGlobal('js_files', AssetHelper::getJs());
     $twig->addGlobal('inline_js', AssetHelper::getInlineJs());
     $twig->addGlobal('inline_css', AssetHelper::getInlineCss());
+    $twig->addFunction(new \Twig\TwigFunction('__', function (string $key, array $params = []) {
+      return \Core\Lang::get($key, $params);
+    }));
     $twig->addFunction(new \Twig\TwigFunction('render_assets', function () {
       $html = '';
 
@@ -137,17 +140,7 @@ class TwigService
     $twig->addFunction(new TwigFunction('clear_flash_messages', function () {
       unset($_SESSION['flash_mess']);
     }));
-    $labels = include __DIR__ . '/../../App/Config/labels.php';
 
-    $twig->addFunction(new TwigFunction('label', function (string $key, ?string $fallback = null) use ($labels) {
-      // Cerca la chiave nella mappa
-      if (isset($labels[$key])) {
-        return $labels[$key];
-      }
-
-      // Se non trovata, restituisci fallback o la chiave stessa
-      return $fallback ?? $key;
-    }));
 
 
 

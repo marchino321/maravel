@@ -32,6 +32,21 @@ Debug::log("✅ Configurazione caricata da {$configFile}", 'CONFIG');
 require_once __DIR__ . '/ConfigFiles/bootstrap.php';
 Debug::log("Bootstrap inizializzato", 'BOOTSTRAP');
 
+
+$supported = ['it', 'en', 'es'];
+
+$lang = $_GET['lang'] ?? ($_SESSION['lang'] ?? null);
+if (!$lang) {
+  $lang = \Core\Lang::detectBrowserLang($supported);
+}
+if (!in_array($lang, $supported, true)) {
+  $lang = 'it';
+}
+$_SESSION['lang'] = $lang;
+
+\Core\Lang::set($lang);
+
+
 // -------------------------
 // Controllo se la richiesta è API
 // -------------------------
@@ -52,7 +67,7 @@ if (!$isApi) {
 
   $menu        = new Menu($menuManager);
   $menu->menuAdmin(); // per admin
-  // $menu->menuSuperAdmin(); // opzionale
+
 
   $twigManager = new TwigManager();
   $twig        = TwigService::init($menuManager);
