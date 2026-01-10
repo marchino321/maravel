@@ -17,7 +17,7 @@ class Home extends Controller
   public function Index(...$params): void
   {
     echo $this->twigManager->getTwig()->render('Public/landing-page.html', [
-      'Logo' => Config::$Logo_App
+      'Titolo' => "Home"
     ]);
   }
 }
