@@ -1,7 +1,7 @@
 # 🚀 Maravel Framework
 
 
-![Maravel Framework Logo](docs/maravel_logo.webp)
+![Maravel Framework Logo](docs/logo_giusto.png)
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-stable-brightgreen)
