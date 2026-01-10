@@ -28,6 +28,7 @@
 
 ## 📁 Struttura del progetto
 
+```text
 /
 ├── App/                # Logica applicativa (Controller, Models, Plugins, Services)
 ├── Core/               # Core del framework (Router, Auth, View, Event, ecc.)
@@ -42,7 +43,7 @@
 ├── cli.php             # Entry point CLI
 ├── install.php         # Script di installazione
 ├── composer.json
-
+```
 ---
 
 ## 🔌 Sistema Plugin
