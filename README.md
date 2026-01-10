@@ -60,6 +60,7 @@ It is built for developers who want **full control over their code**, without gi
 Maravel includes an advanced Plugin System, inspired by the best CMS platforms but adapted to an MVC framework.
 
 A plugin can:
+
 	•	Register routes
 	•	Add menu entries
 	•	Hook into events
@@ -165,6 +166,7 @@ This controller behaves exactly like an App controller, proving that plugins are
 </html>
 ```
 ▶️ How to test the plugin
+
 	1.	Make sure the plugin is enabled (plugins are auto-loaded by default)
 	2.	Start your local development server
 	3.	Open your browser and visit:
@@ -176,6 +178,7 @@ This controller behaves exactly like an App controller, proving that plugins are
 🧠 Why plugins matter in Maravel
 
 Plugins allow you to:
+
 	•	Keep the Core clean and stable
 	•	Encapsulate features
 	•	Enable or disable functionality
@@ -189,6 +192,7 @@ This approach makes Maravel ideal for long-lived projects, SaaS platforms, and m
 📌 Summary
 
 The ExamplePlugin demonstrates:
+
 	•	Route registration inside a plugin
 	•	Controller logic isolated from the Core
 	•	Twig rendering from plugin views
@@ -203,11 +207,13 @@ If you understand this plugin, you understand how Maravel works.
 🔔 Event Manager
 
 The framework integrates an Event Manager that allows you to:
+
 	•	Decouple application logic
 	•	React to domain events
 	•	Extend behavior without modifying existing code
 
 Examples:
+
 	•	profile.completed
 	•	listing.created
 	•	user.registered
@@ -227,6 +233,7 @@ EventManager::on("user.login", function ($session) {
 Maravel Framework includes a centralized core update system, designed to manage multiple projects based on the same framework.
 
 With a single command you can:
+
 	•	Scan the entire Core
 	•	Generate a structured representation (core.json)
 	•	Update shared files
@@ -241,6 +248,7 @@ php build-core-json.php
 ✅ core.json generated
 ```
 Benefits
+
 	•	🔁 Update the core only once
 	•	🧩 No impact on App/ or plugins
 	•	🚀 Continuous framework evolution
@@ -252,6 +260,7 @@ Benefits
 🧪 CLI
 
 Maravel includes a dedicated CLI entry point (cli.php) for:
+
 	•	Migrations
 	•	Maintenance operations
 	•	Internal scripts
@@ -262,6 +271,7 @@ Easily extensible with custom commands.
 ⸻
 
 🔐 Security
+
 	•	Protection against direct access
 	•	Centralized authentication
 	•	Session handling
@@ -272,6 +282,7 @@ Easily extensible with custom commands.
 ⸻
 
 ⚙️ Requirements
+
 	•	PHP ≥ 8.3
 	•	Common PHP extensions (PDO, JSON, mbstring)
 	•	Composer
@@ -280,6 +291,7 @@ Easily extensible with custom commands.
 ⸻
 
 🛣️ Roadmap (Evolving)
+
 	•	Middleware system
 	•	Response object
 	•	Validation layer
@@ -298,6 +310,7 @@ The core framework is public by design.
 Business logic, client-specific modules, and commercial plugins are intentionally kept private.
 
 This ensures:
+
 	•	a stable and evolving core
 	•	transparency
 	•	freedom to extend Maravel in any direction
