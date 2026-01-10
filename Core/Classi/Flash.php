@@ -5,9 +5,10 @@ namespace Core\Classi;
 use App\Config;
 use Core\View\TwigManager;
 
-if (!defined("CLI_MODE")) {
-  defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
-}
+// if (!defined("CLI_MODE")) {
+//   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
+// }
+
 /**
  * Gestione messaggi flash
  * - Memorizza messaggi in sessione
