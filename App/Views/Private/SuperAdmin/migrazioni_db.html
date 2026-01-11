@@ -56,7 +56,21 @@
           <code>{{ sqlExportPath }}</code>
         </p>
 
-        <form method="get" action="/private/super-admin/export-db-schema">
+        <form method="get" action="/private/super-admin/export-db-schema" class="row">
+          <div class="col-md-12 mb-3">
+            <div class="pretty p-icon p-toggle">
+              <input type="checkbox" value="schema" name="tipo_export" />
+              <div class="state p-on">
+                <i class="icon icon mdi mdi-database-outline"></i>
+                <label>Solo Schema</label>
+              </div>
+              <div class="state p-off">
+                <i class="icon mdi mdi-database"></i>
+                <label>Tutto DataBase</label>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-success w-100">
             📦 Genera Snapshot SQL
           </button>

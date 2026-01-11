@@ -199,7 +199,11 @@ class SuperAdmin extends Controller
   public function ExportDbSchema(): void
   {
     $mm = new MigrationManager();
-    $file = $mm->exportCurrentSchema();
+    $data = '';
+    if (isset($_GET['tipo_export'])) {
+      $data = '--no-data';
+    }
+    $file = $mm->exportCurrentSchema($data);
 
     Flash::AddMex("Snapshot DB creato: {$file}", Flash::SUCCESS);
     header("Location: /private/super-admin/migrazioni-database", true, 303);

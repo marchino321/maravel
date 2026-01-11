@@ -112,7 +112,7 @@ class MigrationManager
      * EXPORT SCHEMA (ADMIN ONLY)
      * ===================================================== */
 
-  public function exportCurrentSchema(): string
+  public function exportCurrentSchema($data): string
   {
     $dir = Config::$baseDir . '/MigrationsSQL';
 
@@ -129,7 +129,7 @@ class MigrationManager
     }
 
     $cmd = sprintf(
-      'mysqldump -h%s -u%s -p%s %s > %s',
+      'mysqldump ' . $data . ' -h%s -u%s -p%s %s > %s',
       escapeshellarg(Config::$dbConfig['host']),
       escapeshellarg(Config::$dbConfig['user']),
       escapeshellarg(Config::$dbConfig['pass']),
