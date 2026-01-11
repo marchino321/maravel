@@ -3,6 +3,7 @@
 namespace Core;
 
 use App\Config;
+use App\Debug;
 
 final class Lang
 {
@@ -10,30 +11,55 @@ final class Lang
   private static array $fallbackStrings = [];
   private static string $lang = 'it';
   private static string $fallback = 'it';
+  private static array $pluginPaths = [];
+  private static array $availableLangs = ['it', 'en', 'es'];
+
+  // 👇 chiamato dai plugin
+  public static function registerPluginLangPath(string $path): void
+  {
+    if (is_dir($path)) {
+      self::$pluginPaths[] = rtrim($path, '/');
+    }
+  }
+
+  public static function registerLanguage(string $lang): void
+  {
+    if (!in_array($lang, self::$availableLangs, true)) {
+      self::$availableLangs[] = $lang;
+    }
+  }
+
+  public static function available(): array
+  {
+    return self::$availableLangs;
+  }
 
   public static function set(string $lang): void
   {
     self::$lang = $lang ?: 'it';
 
-    $file = Config::$baseDir . '/App/Lang/' . self::$lang . '.php';
-    $loaded = [];
+    // 1️⃣ carica core
+    self::$strings = self::loadLangFile(Config::$baseDir . '/App/Lang', self::$lang);
 
-    if (file_exists($file)) {
-      $loaded = require $file;
+    // 2️⃣ carica plugin (sovrascrivono il core)
+    foreach (self::$pluginPaths as $pluginLangDir) {
+      $pluginStrings = self::loadLangFile($pluginLangDir, self::$lang);
+      self::$strings = array_replace(self::$strings, $pluginStrings);
     }
-
-    // ✅ se non è un array, non rompere l’app
-    self::$strings = is_array($loaded) ? $loaded : [];
-
+    Debug::log('Lingua richiesta = ' . $lang, 'LANG');
     // fallback IT
-    $fallbackFile = Config::$baseDir . '/App/Lang/it.php';
-    $fallbackLoaded = [];
+    self::$fallbackStrings = self::loadLangFile(Config::$baseDir . '/App/Lang', self::$fallback);
+  }
 
-    if (file_exists($fallbackFile)) {
-      $fallbackLoaded = require $fallbackFile;
+  private static function loadLangFile(string $baseDir, string $lang): array
+  {
+    $file = "{$baseDir}/{$lang}.php";
+    if (!file_exists($file)) {
+      return [];
     }
 
-    self::$fallbackStrings = is_array($fallbackLoaded) ? $fallbackLoaded : [];
+    $data = require $file;
+    return is_array($data) ? $data : [];
   }
 
   public static function get(string $key, array $params = []): string
@@ -42,11 +68,8 @@ final class Lang
       ?? self::$fallbackStrings[$key]
       ?? $key;
 
-    // Placeholder: {name}, {count}, ecc.
-    if ($params) {
-      foreach ($params as $k => $v) {
-        $text = str_replace('{' . $k . '}', (string)$v, $text);
-      }
+    foreach ($params as $k => $v) {
+      $text = str_replace('{' . $k . '}', (string)$v, $text);
     }
 
     return $text;
@@ -57,7 +80,7 @@ final class Lang
     return self::$lang;
   }
 
-  public static function detectBrowserLang(array $supported = ['it', 'en', 'fr', 'es']): string
+  public static function detectBrowserLang(array $supported = ['it', 'en', 'es']): string
   {
     if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
       return 'it';

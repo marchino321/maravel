@@ -1,28 +1,57 @@
 {% for voce in headerMenu %}
-	<li class="dropdown notification-list topbar-dropdown">
-		<a class="nav-link dropdown-toggle waves-effect waves-light" href="{{ voce.url }}" {% if voce.children is not empty %} data-bs-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false" {% endif %}>
+<li class="dropdown notification-list topbar-dropdown">
+  <a class="nav-link dropdown-toggle waves-effect waves-light" href="{{ voce.url }}" {% if voce.children is not empty %}
+    data-bs-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false" {% endif %}>
 
-			{% if voce.icon %}
-				<i class="{{ voce.icon }}"></i>&nbsp;
-			{% endif %}
-			<span>{{ voce.label }}</span>
-			{% if voce.children is not empty %}
-				<i class="mdi mdi-chevron-down"></i>
-			{% endif %}
-		</a>
+    {% if voce.icon %}
+    <i class="{{ voce.icon }}"></i>&nbsp;
+    {% endif %}
+    <span>{{ voce.label }}</span>
+    {% if voce.children is not empty %}
+    <i class="mdi mdi-chevron-down"></i>
+    {% endif %}
+  </a>
 
-		{% if voce.children is not empty %}
-			<div class="dropdown-menu dropdown-menu-end profile-dropdown">
-				{% for child in voce.children %}
-					<a href="{{ child.url }}" class="dropdown-item notify-item">
-						{% if child.icon %}
-							<i class="{{ child.icon }}"></i>&nbsp;
+  {% if voce.children is not empty %}
+  <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+    {% for child in voce.children %}
+    <a href="{{ child.url }}" class="dropdown-item notify-item">
+      {% if child.icon %}
+      <i class="{{ child.icon }}"></i>&nbsp;
 
-						{% endif %}
-						<span>{{ child.label }}</span>
-					</a>
-				{% endfor %}
-			</div>
-		{% endif %}
-	</li>
+      {% endif %}
+      <span>{{ child.label }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</li>
 {% endfor %}
+<li class="dropdown notification-list topbar-dropdown">
+  <a class="nav-link dropdown-toggle waves-effect waves-light" href="#" data-bs-toggle="dropdown" role="button"
+    aria-haspopup="false" aria-expanded="false">
+
+    {# 🌍 Icona + lingua corrente #}
+    <span class="d-inline-flex align-items-center">
+      <span class="me-1">{{ lang_flag(currentLang) }}</span>
+      <span>{{ lang_label(currentLang) }}</span>
+    </span>
+
+    <i class="mdi mdi-chevron-down ms-1"></i>
+  </a>
+
+  <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+    {% for lang in availableLangs %}
+    <a href="?lang={{ lang }}" class="dropdown-item notify-item d-flex align-items-center
+                {% if lang == currentLang %}active{% endif %}">
+
+      <span class="me-2">{{ lang_flag(lang) }}</span>
+      <span class="flex-grow-1">{{ lang_label(lang) }}</span>
+
+      {% if lang == currentLang %}
+      <i class="mdi mdi-check text-success"></i>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</li>

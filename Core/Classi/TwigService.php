@@ -12,6 +12,8 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Core\Helpers\AssetHelper;
 use Core\Helpers\Csrf;
+use Core\Helpers\LangHelper;
+use Core\Lang;
 
 if (!defined("CLI_MODE")) {
   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
@@ -141,6 +143,9 @@ class TwigService
       unset($_SESSION['flash_mess']);
     }));
 
+
+    $twig->addFunction(new \Twig\TwigFunction('lang_flag', fn($l) => LangHelper::flag($l)));
+    $twig->addFunction(new \Twig\TwigFunction('lang_label', fn($l) => LangHelper::label($l)));
 
 
 

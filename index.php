@@ -15,6 +15,7 @@ use Core\View\MenuManager;
 use Core\View\TwigManager;
 use Core\Classi\Menu;
 use Core\Classi\TwigService;
+use Core\Lang;
 
 // -------------------------
 // Config e bootstrap
@@ -33,18 +34,9 @@ require_once __DIR__ . '/ConfigFiles/bootstrap.php';
 Debug::log("Bootstrap inizializzato", 'BOOTSTRAP');
 
 
-$supported = ['it', 'en', 'es'];
 
-$lang = $_GET['lang'] ?? ($_SESSION['lang'] ?? null);
-if (!$lang) {
-  $lang = \Core\Lang::detectBrowserLang($supported);
-}
-if (!in_array($lang, $supported, true)) {
-  $lang = 'it';
-}
-$_SESSION['lang'] = $lang;
 
-\Core\Lang::set($lang);
+
 
 
 // -------------------------
@@ -96,10 +88,28 @@ $router = new Router($twigManager, $menuManager);
 $pluginManager = Plugin::loadAll();
 
 if (!$isApi) {
+  // 🔌 QUI i plugin registrano lingue, path, menu, ecc.
   $pluginManager->registerRoutes($router, $twigManager, $menuManager);
+
   $headerPlugin = new \App\Plugins\HeaderMenu\HeaderMenu();
   $twig->addGlobal('headerMenu', $headerPlugin->getMenu());
 }
+
+
+$supported = Lang::available();
+//dd($supported);
+$lang = $_GET['lang'] ?? ($_SESSION['lang'] ?? null);
+if (!$lang) {
+  $lang = Lang::detectBrowserLang($supported);
+}
+if (!in_array($lang, $supported, true)) {
+  $lang = 'it';
+}
+$_SESSION['lang'] = $lang;
+// 🌍 ORA le lingue dei plugin esistono
+Lang::set($lang);
+$twigManager->addGlobal('availableLangs', Lang::available());
+$twigManager->addGlobal('currentLang', Lang::current());
 
 // -------------------------
 // Dispatch della richiesta
