@@ -39,11 +39,11 @@ It is built for developers who want **full control over their code**, without gi
 	-	✅ Centralized core update system (file & ZIP based, with rollback)
 	-	✅ Safe automatic backups during updates
 	-	✅ Migration system
-	-	First install via SQL snapshot (LastDb.sql)
-	-	Project-specific PHP migrations (up / down)
+	-	✅ First install via SQL snapshot (LastDb.sql)
+	-	✅ Project-specific PHP migrations (up / down)
 	-	✅ Environment-aware error handling
-	-	Developer debug console
-	-	Production-safe Twig error pages
+	-	✅ Developer debug console
+	-	✅ Production-safe Twig error pages
 	-	✅ Centralized configuration via JSON
 	-	✅ Built-in CSRF protection
 	-	✅ Multilingual system with plugin-based global language packs
