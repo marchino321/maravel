@@ -24,12 +24,27 @@ class TwigService
   public static function init($menuManager = null): Environment
   {
     $viewsCore = realpath(__DIR__ . '/../../App/Views');
+
     $loader = new FilesystemLoader($viewsCore);
+
+    // =============================
+    // Theme support (SAFE & OPTIONAL)
+    // =============================
+    if (class_exists(\Core\View\ThemeManager::class)) {
+      if (
+        property_exists(\Core\View\ThemeManager::class, 'basePath') &&
+        !empty(\Core\View\ThemeManager::$basePath) &&
+        is_dir(\Core\View\ThemeManager::$basePath)
+      ) {
+        $loader->addPath(\Core\View\ThemeManager::$basePath, 'theme');
+        Debug::log(
+          'Twig namespace @theme registrato: ' . \Core\View\ThemeManager::$basePath,
+          'THEME'
+        );
+      }
+    }
     /** @var \Twig\Loader\FilesystemLoader $loader */
-    $loader->addPath(
-      ThemeManager::$basePath,
-      'theme'
-    );
+
     $twig = new Environment($loader, [
       'debug' => true,
       'cache' => __DIR__ . '/../cache/twig',
@@ -85,16 +100,25 @@ class TwigService
     foreach ($filters as $filter) {
       $twig->addFilter($filter);
     }
-    $twig->addGlobal('currentTheme', ThemeManager::$theme);
+    // -------------------------
+    // Globali tema (opzionali)
+    // -------------------------
+    if (class_exists(\Core\View\ThemeManager::class)) {
 
-    $twig->addGlobal('availableThemes', array_map(
-      'basename',
-      glob(Config::$baseDir . '/App/Theme/*', GLOB_ONLYDIR)
-    ));
-    $twig->addGlobal('css_files', AssetHelper::getCss());
-    $twig->addGlobal('js_files', AssetHelper::getJs());
-    $twig->addGlobal('inline_js', AssetHelper::getInlineJs());
-    $twig->addGlobal('inline_css', AssetHelper::getInlineCss());
+      $twig->addGlobal(
+        'currentTheme',
+        \Core\View\ThemeManager::$theme ?? 'default'
+      );
+
+      $themesDir = Config::$baseDir . '/App/Theme';
+      $twig->addGlobal(
+        'availableThemes',
+        is_dir($themesDir)
+          ? array_map('basename', glob($themesDir . '/*', GLOB_ONLYDIR))
+          : []
+      );
+    }
+
     $twig->addFunction(new \Twig\TwigFunction('__', function (string $key, array $params = []) {
       return \Core\Lang::get($key, $params);
     }));

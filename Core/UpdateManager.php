@@ -6,18 +6,12 @@ use App\Config;
 use App\Debug;
 use ZipArchive;
 
-
 if (!defined("CLI_MODE")) {
   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
 }
+
 /**
  * Gestore aggiornamenti core
- *
- * - Controlla aggiornamenti dal server remoto
- * - Scarica e applica update tramite file singoli o pacchetti ZIP
- * - Verifica integrità con SHA256
- * - Esegue backup automatico con rollback
- * - Usa lock file per evitare aggiornamenti multipli simultanei
  */
 class UpdateManager
 {
@@ -29,24 +23,78 @@ class UpdateManager
   public function __construct()
   {
     $this->versionFile  = Config::$configDir . '/update.json';
-    $this->updateServer = 'https://' . Config::$LinkUpdate . "/MyFiles/core.json";
-    $this->backupDir    = Config::$baseDir . '/../backups/';
-    $this->lockFile     = Config::$baseDir . '/../.update_lock';
+    $this->updateServer = "https://hd.marcodattisi.it/MyFiles/core.json";
+    $systemDir = $_SERVER['DOCUMENT_ROOT'] . '/_system';
+
+    if (!is_dir($systemDir)) {
+      mkdir($systemDir, 0777, true);
+      Debug::log("📁 Directory _system creata", 'UPDATE');
+    }
+
+    $this->backupDir = $systemDir . '/backups/';
+    $this->lockFile  = $systemDir . '/.update_lock';
   }
 
   /**
-   * Controlla se sono disponibili aggiornamenti
+   * Normalizza un path e garantisce che resti dentro DOCUMENT_ROOT
+   */
+  private function safePath(string $path): string
+  {
+    $realBase = realpath($_SERVER['DOCUMENT_ROOT']);
+    $realPath = realpath($path);
+
+    if ($realPath === false) {
+      return $_SERVER['DOCUMENT_ROOT'] . '/_system/' . basename($path);
+    }
+
+    // se il path esce da public_html → fallback automatico
+    if ($realBase && !str_starts_with($realPath, $realBase)) {
+      Debug::log("⚠️ Path fuori open_basedir, fallback applicato: {$path}", 'UPDATE');
+
+      return $realBase . '/_system/' . basename($path);
+    }
+
+    return $path;
+  }
+  /**
+   * Garantisce che la directory del file esista
+   */
+  private function ensureDirectory(string $filePath): void
+  {
+    $dir = dirname($filePath);
+
+    $base = realpath($_SERVER['DOCUMENT_ROOT']);
+    $real = realpath($dir);
+
+    // ❌ se il path non è risolvibile o esce da public_html → STOP
+    if ($base === false || $real === false || !str_starts_with($real, $base)) {
+      Debug::log("🚫 ensureDirectory bloccata (open_basedir): {$dir}", 'UPDATE');
+      return;
+    }
+
+    if (!is_dir($real)) {
+      mkdir($real, 0777, true);
+      Debug::log("📁 Creata directory: {$real}", 'UPDATE');
+    }
+  }
+
+  /**
+   * Controlla aggiornamenti
    */
   public function checkForUpdates(): array
   {
-    $local  = @json_decode(@file_get_contents($this->versionFile), true);
-    $remote = @json_decode(@file_get_contents($this->updateServer), true);
+    if (!file_exists($this->versionFile)) {
+      return ['error' => "File update.json mancante"];
+    }
+
+    $local  = json_decode(file_get_contents($this->versionFile), true);
+    $remote = json_decode(@file_get_contents($this->updateServer), true);
 
     if (!is_array($local)) {
-      return ['error' => "File update.json non valido o mancante"];
+      return ['error' => "File update.json non valido"];
     }
     if (!is_array($remote)) {
-      return ['error' => "File core.json non valido o mancante"];
+      return ['error' => "File core.json remoto non valido"];
     }
 
     $result = [
@@ -54,7 +102,10 @@ class UpdateManager
       'update_available' => false,
     ];
 
-    if (isset($remote['latest_core']) && version_compare($remote['latest_core'], $local['core_version'], '>')) {
+    if (
+      isset($remote['latest_core']) &&
+      version_compare($remote['latest_core'], $local['core_version'], '>')
+    ) {
       $result['update_available'] = true;
       $result['latest']           = $remote['latest_core'];
       $result['patches']          = $remote['security_patches'] ?? [];
@@ -71,15 +122,16 @@ class UpdateManager
   public function applyUpdate(): bool
   {
     if ($this->isLocked()) {
-      Debug::log("🚫 Aggiornamento già in corso!", 'UPDATE');
+      Debug::log("🚫 Aggiornamento già in corso", 'UPDATE');
       return false;
     }
+
     $this->lock();
 
     $updates = $this->checkForUpdates();
 
     if (isset($updates['error'])) {
-      Debug::log("❌ Errore update: " . $updates['error'], 'UPDATE');
+      Debug::log("❌ Errore update: {$updates['error']}", 'UPDATE');
       $this->unlock();
       return false;
     }
@@ -90,49 +142,47 @@ class UpdateManager
       return false;
     }
 
-    $ok = false;
-
-    // 🔹 ZIP update
-    if (!empty($updates['zip'])) {
-      $ok = $this->applyZipUpdate($updates['zip'], $updates['latest']);
-    } else {
-      // 🔹 Aggiornamento file singoli
-      $ok = $this->applyFilesUpdate($updates['files'], $updates['latest']);
-    }
+    $ok = !empty($updates['zip'])
+      ? $this->applyZipUpdate($updates['zip'], $updates['latest'])
+      : $this->applyFilesUpdate($updates['files'], $updates['latest']);
 
     $this->unlock();
     return $ok;
   }
 
   /**
-   * Applica aggiornamento tramite file singoli
+   * Aggiornamento file singoli
    */
   private function applyFilesUpdate(array $files, string $latestVersion): bool
   {
     $backupPath = $this->createBackup();
 
     foreach ($files as $file) {
-      $url   = $file['url'] ?? null;
-      $path  = $file['path'] ?? null;
-      $hash  = $file['sha256'] ?? null;
+      $url  = $file['url'] ?? null;
+      $path = $file['path'] ?? null;
+      $hash = $file['sha256'] ?? null;
 
       if (!$url || !$path) {
-        Debug::log("⚠️ File update non valido (manca url o path)", 'UPDATE');
+        Debug::log("⚠️ File update non valido", 'UPDATE');
         continue;
       }
 
       $content = @file_get_contents($url);
       if ($content === false) {
-        Debug::log("⚠️ Impossibile scaricare file: {$url}", 'UPDATE');
+        Debug::log("⚠️ Download fallito: {$url}", 'UPDATE');
         continue;
       }
 
       if ($hash && !hash_equals(strtolower($hash), hash('sha256', $content))) {
-        Debug::log("❌ Hash non valido per {$url}", 'UPDATE');
+        Debug::log("❌ Hash non valido: {$path}", 'UPDATE');
         continue;
       }
 
-      $target = $_SERVER['DOCUMENT_ROOT'] . '/' . $path;
+      $target = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($path, '/');
+
+      // ✅ FIX 1: crea directory target
+      $this->ensureDirectory($target);
+
       $this->backupFile($target, $backupPath);
 
       file_put_contents($target, $content);
@@ -144,7 +194,7 @@ class UpdateManager
   }
 
   /**
-   * Applica aggiornamento tramite pacchetto ZIP
+   * Aggiornamento ZIP
    */
   private function applyZipUpdate(array $zipInfo, string $latestVersion): bool
   {
@@ -152,94 +202,79 @@ class UpdateManager
     $hash   = $zipInfo['sha256'] ?? null;
 
     if (!$zipUrl) {
-      Debug::log("❌ Nessun URL ZIP trovato", 'UPDATE');
+      Debug::log("❌ URL ZIP mancante", 'UPDATE');
       return false;
     }
 
-    $tmpFile = sys_get_temp_dir() . '/update_' . time() . '.zip';
     $content = @file_get_contents($zipUrl);
-
     if ($content === false) {
-      Debug::log("❌ Impossibile scaricare pacchetto ZIP: {$zipUrl}", 'UPDATE');
+      Debug::log("❌ Download ZIP fallito", 'UPDATE');
       return false;
     }
 
     if ($hash && !hash_equals(strtolower($hash), hash('sha256', $content))) {
-      @unlink($tmpFile);
-      Debug::log("❌ Hash ZIP non valido! File eliminato", 'UPDATE');
+      Debug::log("❌ Hash ZIP non valido", 'UPDATE');
       return false;
     }
 
+    $tmpFile = sys_get_temp_dir() . '/update_' . time() . '.zip';
     file_put_contents($tmpFile, $content);
 
     $zip = new ZipArchive;
-    if ($zip->open($tmpFile) === true) {
-      $extractPath = Config::$baseDir . '/../update_tmp';
-      if (!is_dir($extractPath)) mkdir($extractPath, 0777, true);
-
-      $zip->extractTo($extractPath);
-      $zip->close();
-      @unlink($tmpFile);
-
-      // Backup completo
-      $backupPath = $this->createBackup();
-
-      // Copia i file
-      $this->copyRecursive($extractPath, $_SERVER['DOCUMENT_ROOT'], $backupPath);
-      Debug::log("📦 Pacchetto ZIP applicato correttamente", 'UPDATE');
-
-      // Pulisce cartella temporanea
-      $this->removeDir($extractPath);
-
-      $this->updateLocalVersion($latestVersion);
-      return true;
-    } else {
-      Debug::log("❌ Errore apertura pacchetto ZIP", 'UPDATE');
+    if ($zip->open($tmpFile) !== true) {
+      Debug::log("❌ Errore apertura ZIP", 'UPDATE');
       return false;
     }
-  }
 
-  /**
-   * Copia ricorsiva con backup
-   */
-  private function copyRecursive(string $src, string $dst, string $backupPath): void
-  {
-    $iterator = new \RecursiveIteratorIterator(
-      new \RecursiveDirectoryIterator($src, \FilesystemIterator::SKIP_DOTS),
-      \RecursiveIteratorIterator::SELF_FIRST
-    );
-
-    foreach ($iterator as $item) {
-      $target = $dst . '/' . $iterator->getSubPathName();
-
-      if ($item->isDir()) {
-        if (!is_dir($target)) mkdir($target, 0777, true);
-      } else {
-        $this->backupFile($target, $backupPath);
-        copy($item, $target);
-        Debug::log("🔄 Copiato file: {$target}", 'UPDATE');
-      }
+    $extractPath = Config::$baseDir . '/../update_tmp';
+    if (!is_dir($extractPath)) {
+      mkdir($extractPath, 0777, true);
     }
+
+    $zip->extractTo($extractPath);
+    $zip->close();
+    unlink($tmpFile);
+
+    $backupPath = $this->createBackup();
+
+    $this->copyRecursive($extractPath, $_SERVER['DOCUMENT_ROOT'], $backupPath);
+    $this->removeDir($extractPath);
+
+    $this->updateLocalVersion($latestVersion);
+    Debug::log("📦 ZIP applicato correttamente", 'UPDATE');
+    return true;
   }
 
   /**
-   * Backup singolo file
+   * Backup file singolo
    */
   private function backupFile(string $target, string $backupPath): void
   {
-    if (file_exists($target)) {
-      $dest = $backupPath . '/' . ltrim(str_replace($_SERVER['DOCUMENT_ROOT'], '', $target), '/');
-      if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0777, true);
-      copy($target, $dest);
-      Debug::log("💾 Backup creato per {$target}", 'UPDATE');
+    if (!file_exists($target)) {
+      return;
     }
+
+    $dest = $backupPath . '/' . ltrim(
+      str_replace($_SERVER['DOCUMENT_ROOT'], '', $target),
+      '/'
+    );
+
+    if (!is_dir(dirname($dest))) {
+      mkdir(dirname($dest), 0777, true);
+    }
+
+    copy($target, $dest);
+    Debug::log("💾 Backup: {$dest}", 'UPDATE');
   }
 
   /**
-   * Crea backup completo (directory timestampata)
+   * Backup completo
    */
   private function createBackup(): string
   {
+    // ✅ FIX 2: crea directory backup se manca
+    $this->ensureDirectory($this->backupDir . '/dummy.txt');
+
     $path = $this->backupDir . date('Ymd_His');
     mkdir($path, 0777, true);
 
@@ -252,28 +287,38 @@ class UpdateManager
   }
 
   /**
-   * Aggiorna il file update.json locale
+   * Aggiorna versione locale
    */
   private function updateLocalVersion(string $latest): void
   {
+    // ✅ FIX 3: directory config garantita
+    $this->ensureDirectory($this->versionFile);
+
     $local = json_decode(file_get_contents($this->versionFile), true);
     $local['core_version'] = $latest;
     $local['last_update']  = date('Y-m-d H:i:s');
-    file_put_contents($this->versionFile, json_encode($local, JSON_PRETTY_PRINT));
-    Debug::log("✅ Versione locale aggiornata a {$latest}", 'UPDATE');
+
+    file_put_contents(
+      $this->versionFile,
+      json_encode($local, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+
+    Debug::log("✅ Versione aggiornata a {$latest}", 'UPDATE');
   }
 
   /**
-   * Lock/unlock aggiornamento
+   * Lock update
    */
   private function lock(): void
   {
-    file_put_contents($this->lockFile, (string)getmypid());
+    file_put_contents($this->lockFile, (string) getmypid());
   }
 
   private function unlock(): void
   {
-    if (file_exists($this->lockFile)) unlink($this->lockFile);
+    if (file_exists($this->lockFile)) {
+      unlink($this->lockFile);
+    }
   }
 
   private function isLocked(): bool
@@ -282,42 +327,71 @@ class UpdateManager
   }
 
   /**
-   * Rollback all'ultimo backup
+   * Rollback
    */
   public function rollback(): bool
   {
     $backups = glob($this->backupDir . '*', GLOB_ONLYDIR);
-    if (empty($backups)) {
-      Debug::log("⚠️ Nessun backup trovato per rollback", 'UPDATE');
+    if (!$backups) {
+      Debug::log("⚠️ Nessun backup per rollback", 'UPDATE');
       return false;
     }
+
     rsort($backups);
     $lastBackup = $backups[0];
 
-    $this->copyRecursive($lastBackup, $_SERVER['DOCUMENT_ROOT'], $this->backupDir . 'rollback_' . time());
+    $this->copyRecursive(
+      $lastBackup,
+      $_SERVER['DOCUMENT_ROOT'],
+      $this->backupDir . 'rollback_' . time()
+    );
 
-    $backupUpdateJson = $lastBackup . '/update.json';
-    if (file_exists($backupUpdateJson)) {
-      copy($backupUpdateJson, $this->versionFile);
-      Debug::log("🔄 update.json ripristinato", 'UPDATE');
+    if (file_exists($lastBackup . '/update.json')) {
+      copy($lastBackup . '/update.json', $this->versionFile);
     }
 
-    Debug::log("🔙 Rollback eseguito da {$lastBackup}", 'UPDATE');
+    Debug::log("🔙 Rollback da {$lastBackup}", 'UPDATE');
     return true;
   }
 
   /**
-   * Cancella ricorsivamente una directory
+   * Cancella directory
    */
   private function removeDir(string $dir): void
   {
     if (!is_dir($dir)) return;
-    $it = new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS);
-    $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
-    foreach ($files as $file) {
+
+    $it = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($it as $file) {
       $file->isDir() ? rmdir($file) : unlink($file);
     }
+
     rmdir($dir);
-    Debug::log("🧹 Rimossa cartella temporanea: {$dir}", 'UPDATE');
+  }
+
+  /**
+   * Copia ricorsiva
+   */
+  private function copyRecursive(string $src, string $dst, string $backupPath): void
+  {
+    $it = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($src, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($it as $item) {
+      $target = $dst . '/' . $it->getSubPathName();
+
+      if ($item->isDir()) {
+        if (!is_dir($target)) mkdir($target, 0777, true);
+      } else {
+        $this->backupFile($target, $backupPath);
+        copy($item, $target);
+      }
+    }
   }
 }

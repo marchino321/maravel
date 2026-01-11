@@ -131,7 +131,9 @@
           {{ 'fine' | startForm() | raw }}
         </div>
 
-        <div class="label text-warning">Tema attivo ({{ currentTheme }})</div>
+        <div class="mt-1"><span class="text-warning">Tema attivo</span> (<span class="text-success">{{currentTheme
+            |capitalize}}</span>)
+        </div>
       </div>
     </div>
   </div>

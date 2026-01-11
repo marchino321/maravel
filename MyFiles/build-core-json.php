@@ -6,24 +6,22 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', '0');
+
 $isCli = (PHP_SAPI === 'cli');
 
-if ($isCli) {
-  $version = $argv[1] ?? '1.0.0';
-} else {
-  $version = $_POST['version'] ?? '1.0.0';
-}
+$version = $isCli
+  ? ($argv[1] ?? '1.0.0')
+  : ($_POST['version'] ?? '1.0.0');
 
-// Normalizza
 $version = trim($version);
-
 
 if (!preg_match('/^\d+\.\d+\.\d+$/', $version)) {
   $version = '1.0.0';
 }
 
-
-
+/* ======================================================
+ * 📌 PATCH NOTES
+ * ====================================================== */
 $patches = [
   "Creazione Sistema MVC custom + API core v0.0.0",
   "Sistema API interno centralizzato v0.1.0",
@@ -39,8 +37,10 @@ $patches = [
 
 $patches = array_reverse($patches);
 
-$isCli = (php_sapi_name() === 'cli');
-$host  = $isCli ? Config::$LinkUpdate : ($_SERVER['HTTP_HOST'] ?? 'localhost');
+/* ======================================================
+ * 🌍 PATH BASE
+ * ====================================================== */
+$host    = $isCli ? Config::$LinkUpdate : ($_SERVER['HTTP_HOST'] ?? 'localhost');
 $baseUrl = "https://{$host}";
 
 $baseDir    = realpath(__DIR__ . '/../');
@@ -51,6 +51,33 @@ if (!$coreDir || !$myFilesDir) {
   exit("❌ Directory Core o MyFiles non trovata\n");
 }
 
+/* ======================================================
+ * ❌ POLICY DI ESCLUSIONE (CORE-SAFE)
+ * ====================================================== */
+
+/**
+ * File che NON devono MAI essere aggiornati
+ */
+$DISALLOWED_FILES = [
+  'Core/Classi/Menu.php',
+  'Core/Classi/MenuManager.php',
+  'ConfigFiles/config.local.json',
+];
+
+/**
+ * Directory escluse dagli update core
+ */
+$DISALLOWED_DIRS = [
+  'Core/cache',
+  'App/Theme',
+  'App/Plugins/Custom',
+  'App/Controllers',
+  'App/Models'
+];
+
+/* ======================================================
+ * 🧠 CORE.JSON BASE
+ * ====================================================== */
 $coreJson = [
   "latest_core"      => $version,
   "security_patches" => $patches,
@@ -58,11 +85,17 @@ $coreJson = [
   "zip"              => null
 ];
 
-/**
+/* ======================================================
  * 📦 Aggiunge un file al core.json + MyFiles
- */
-function addFile(string $absolutePath, string $relativePath, array &$coreJson, string $myFilesDir, string $baseUrl)
-{
+ * ====================================================== */
+function addFile(
+  string $absolutePath,
+  string $relativePath,
+  array &$coreJson,
+  string $myFilesDir,
+  string $baseUrl
+): void {
+
   $txtName = str_replace(['/', '\\'], '_', $relativePath) . '.txt';
   $txtPath = $myFilesDir . DIRECTORY_SEPARATOR . $txtName;
 
@@ -75,16 +108,19 @@ function addFile(string $absolutePath, string $relativePath, array &$coreJson, s
   ];
 }
 
-/**
- * 📂 Scansione directory ricorsiva
- */
+/* ======================================================
+ * 📂 SCANSIONE RICORSIVA CON ESCLUSIONI
+ * ====================================================== */
 function scanDirRecursive(
   string $dir,
   string $basePath,
   array &$coreJson,
   string $myFilesDir,
-  string $baseUrl
-) {
+  string $baseUrl,
+  array $disallowedFiles,
+  array $disallowedDirs
+): void {
+
   $it = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
   );
@@ -95,39 +131,52 @@ function scanDirRecursive(
       continue;
     }
 
-    // ✅ consenti solo php e html
+    $absolutePath = $file->getPathname();
+
+    // estensioni consentite
     $ext = strtolower($file->getExtension());
     if (!in_array($ext, ['php', 'html'], true)) {
       continue;
     }
 
-    // ❌ escludi cache
-    if (str_contains(
-      $file->getPathname(),
-      DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR
-    )) {
+    // escludi cache
+    if (str_contains($absolutePath, DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR)) {
       continue;
     }
 
     $relative = ltrim(
-      str_replace($basePath, '', $file->getPathname()),
+      str_replace($basePath, '', $absolutePath),
       '/\\'
     );
 
-    addFile(
-      $file->getPathname(),
-      $relative,
-      $coreJson,
-      $myFilesDir,
-      $baseUrl
-    );
+    // ❌ directory escluse
+    foreach ($disallowedDirs as $badDir) {
+      if (str_starts_with($relative, rtrim($badDir, '/'))) {
+        continue 2;
+      }
+    }
+
+    // ❌ file esclusi
+    if (in_array($relative, $disallowedFiles, true)) {
+      continue;
+    }
+
+    addFile($absolutePath, $relative, $coreJson, $myFilesDir, $baseUrl);
   }
 }
 
 /* ======================================================
  * 1️⃣ CORE
  * ====================================================== */
-scanDirRecursive($coreDir, $baseDir, $coreJson, $myFilesDir, $baseUrl);
+scanDirRecursive(
+  $coreDir,
+  $baseDir,
+  $coreJson,
+  $myFilesDir,
+  $baseUrl,
+  $DISALLOWED_FILES,
+  $DISALLOWED_DIRS
+);
 
 /* ======================================================
  * 2️⃣ FILE SINGOLI DI FRAMEWORK
@@ -136,8 +185,7 @@ $fixedFiles = [
   'install.php',
   'cli.php',
   'index.php',
-  'ConfigFiles/bootstrap.php'
-
+  'ConfigFiles/bootstrap.php',
 ];
 
 foreach ($fixedFiles as $file) {
@@ -164,7 +212,15 @@ $fixedDirs = [
 foreach ($fixedDirs as $dir) {
   $full = $baseDir . '/' . $dir;
   if (is_dir($full)) {
-    scanDirRecursive($full, $baseDir, $coreJson, $myFilesDir, $baseUrl);
+    scanDirRecursive(
+      $full,
+      $baseDir,
+      $coreJson,
+      $myFilesDir,
+      $baseUrl,
+      $DISALLOWED_FILES,
+      $DISALLOWED_DIRS
+    );
   }
 }
 
