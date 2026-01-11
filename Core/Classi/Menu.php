@@ -7,9 +7,6 @@ use App\Debug;
 use Core\Auth;
 use Core\View\MenuManager;
 
-if (!defined("CLI_MODE")) {
-  defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
-}
 /**
  * Classe Menu compatibile Twig
  * Genera dinamicamente il menu laterale per Admin e SuperAdmin
