@@ -33,6 +33,8 @@ $patches = [
   "Sistema Update centralizzato v0.5.0",
   "Sistema AjaxHelper v0.6.0",
   "Sistema AjaxHelper avanzato v0.7.0",
+  "Sistema Traduzione avanzato v0.8.0",
+  "Sistema di theme custom v0.9.0",
 ];
 
 $patches = array_reverse($patches);
