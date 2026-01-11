@@ -297,13 +297,28 @@ class SuperAdmin extends Controller
   public function ExportDbSchema(): void
   {
     $mm = new MigrationManager();
-    $data = '';
-    if (isset($_GET['tipo_export'])) {
-      $data = '--no-data';
-    }
-    $file = $mm->exportCurrentSchema($data);
 
-    Flash::AddMex("Snapshot DB creato: {$file}", Flash::SUCCESS);
+    $dataFlag = '';
+    if (isset($_GET['tipo_export'])) {
+      $dataFlag = '--no-data';
+    }
+    $lastDb = Config::$baseDir . '/MigrationsSQL/LastDb.sql';
+    if (file_exists($lastDb)) {
+      $timestamp = date('Y_m_d_His');
+      rename(
+        $lastDb,
+        Config::$baseDir  . DIRECTORY_SEPARATOR . "MigrationsSQL" . DIRECTORY_SEPARATOR . "schema_{$timestamp}.sql"
+      );
+    }
+    /**
+     * 1️⃣ Primo export temporaneo per sapere la directory
+     */
+    $tempFile = $mm->exportCurrentSchema($dataFlag);
+    Flash::AddMex(
+      "Snapshot DB creato correttamente (LastDb.sql)",
+      Flash::SUCCESS
+    );
+
     header("Location: /private/super-admin/migrazioni-database", true, 303);
     exit;
   }

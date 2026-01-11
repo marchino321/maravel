@@ -50,10 +50,39 @@ class MigrationManager
     return array_values($files);
   }
 
+
+  public function run(): array
+  {
+    $executed = [];
+
+    $sqlFile = Config::$baseDir . '/MigrationsSQL/LastDb.sql';
+
+    if (!file_exists($sqlFile)) {
+      throw new \RuntimeException('LastDb.sql non trovato. Impossibile applicare lo schema.');
+    }
+
+    $sql = file_get_contents($sqlFile);
+    if ($sql === false || trim($sql) === '') {
+      throw new \RuntimeException('LastDb.sql è vuoto o non leggibile.');
+    }
+
+    try {
+      // ⚠️ NESSUNA TRANSAZIONE (DDL MySQL auto-commit)
+      $this->db->exec($sql);
+      $executed[] = 'LastDb.sql';
+    } catch (\Throwable $e) {
+      throw new \RuntimeException(
+        'Errore durante l’esecuzione di LastDb.sql: ' . $e->getMessage()
+      );
+    }
+
+    return $executed;
+  }
+
   /**
    * Esegue TUTTE le migration (CLI / installer)
    */
-  public function run(): array
+  public function runPHP(): array
   {
     $executed = [];
 
@@ -88,7 +117,7 @@ class MigrationManager
    * (OPZIONALE – FUTURO)
    * Rollback completo
    */
-  public function rollbackAll(): void
+  public function rollbackAllPHP(): void
   {
     $files = array_reverse($this->getAllMigrations());
 
@@ -121,7 +150,7 @@ class MigrationManager
     }
 
     $timestamp = date('Y_m_d_His');
-    $file = $dir . "/schema_{$timestamp}.sql";
+    $file = $dir . "/LastDb.sql";
 
     // check mysqldump
     if (!shell_exec('which mysqldump')) {
