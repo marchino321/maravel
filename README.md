@@ -17,7 +17,7 @@ It is built for developers who want **full control over their code**, without gi
 > ⚠️ Maravel **is not Laravel**.  
 > It is an independent framework, inspired by modern concepts, but built for practical needs and real projects.
 
----
+
 ## ✨ Key Features
 	-	✅ True MVC architecture
 	-	✅ Clear Core / App separation
