@@ -104,18 +104,19 @@ class Installer
     ));
 
     $config = [
-      "dbConfig" => [
-        "host"   => $data['db_host'],
-        "dbname" => $data['db_name'],
-        "user"   => $data['db_user'],
-        "pass"   => $data['db_pass']
+      "dbConfig"      => [
+        "host"        => $data['db_host'],
+        "dbname"      => $data['db_name'],
+        "user"        => $data['db_user'],
+        "pass"        => $data['db_pass']
       ],
-      "HEADER_API" => $headersApi,
-      "site_name" => $data['site_name'],
-      "Logo_App"  => $data['logo_app'],
-      "ABS_KEY"   => $data['abs_key'],
-      "SALT"      => $salt,
-      "LinkMain"  => 'https://' . $host
+      "HEADER_API"    => $headersApi,
+      "DEBUG_CONSOLE" => false,
+      "site_name"     => $data['site_name'],
+      "Logo_App"      => $data['logo_app'],
+      "ABS_KEY"       => $data['abs_key'],
+      "SALT"          => $salt,
+      "LinkMain"      => 'https://' . $host
     ];
 
     $configPath = dirname(__DIR__, 2) . '/ConfigFiles/config.local.json';

@@ -22,7 +22,7 @@ class RussianLang  extends PluginController
 
     // 1️⃣ registra la lingua globale
     Lang::registerLanguage('ru');
-    Debug::log("Lingue supporate adesso " . implode(', ', Lang::available()), 'PLUGIN');
+
     // 2️⃣ registra il file di traduzione globale
     Lang::registerPluginLangPath(__DIR__ . '/Lang');
     Debug::log("Path lingue nuove " . '"' . __DIR__ . '/Lang' . '"', 'PLUGIN');

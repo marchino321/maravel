@@ -4,10 +4,12 @@ namespace App\Controllers\Private;
 
 use App\Config;
 use App\Debug;
+use Core\Auth;
 use Core\Classi\Flash;
 use Core\Controller;
 use Core\Helpers\FormHelper;
 use Core\MigrationManager;
+use Core\Plugin;
 use Core\Services\CliCommandService;
 use Core\UpdateManager;
 use Core\View\TwigManager;
@@ -35,19 +37,115 @@ class SuperAdmin extends Controller
 
   public function Index(...$params): void
   {
+    if (isset($_GET['update'])) {
+      Flash::AddByKey('system.debug');
+    }
+
+
     $service = new SystemInfoService();
 
     $data = $service->getSystemInfo();
     $data['debug'] = $service->isDebugEnabled() ? 'true' : 'false';
     $data['log']   = $service->listLogs();
+
+
+    $updateFile = Config::$baseDir . '/ConfigFiles/update.json';
+
+    $coreVersion = '';
+    $lastUpdate = '';
+    if (file_exists($updateFile)) {
+      $updateData = json_decode(file_get_contents($updateFile), true);
+      $coreVersion = $updateData['core_version'] ?? '';
+      $lastUpdate = $updateData['last_update'] ?? '';
+    }
+    $debugOutput = Debug::getLogs();
+    $plugin_count = Plugin::count();
+    $pluginList = Plugin::getPlugins();
+    //var_export($debugOutput);
     echo $this->twigManager->getTwig()->render(
       'Private/SuperAdmin/index.html',
       [
-        'Titolo' => 'Setting Super Admin',
-        'data'   => $data,
-        'php_sapi'          => php_sapi_name(),
+        'Titolo'       => 'Setting Super Admin',
+        'data'         => $data,
+        'php_sapi'     => php_sapi_name(),
+        'core_version' => $coreVersion,
+        'last_update'  => $lastUpdate,
+        'debug_output' => $debugOutput,
+        'plugin_count' => $plugin_count,
+        'pluginList'   => $pluginList,
       ]
     );
+  }
+  public function togglePluginAjax(): void
+  {
+
+    if (!Auth::checkSuperAdmin()) {
+      $this->jsonResponse(false, ['error' => 'Accesso negato']);
+      return;
+    }
+
+    $plugin = $_POST['plugin'] ?? null;
+    $active = isset($_POST['active']) && $_POST['active'] == 1;
+
+    $configPath = Config::$pluginDir . "/{$plugin}/config.json";
+
+    if (!file_exists($configPath)) {
+      $this->jsonResponse(false, ['error' => 'Config plugin non trovata']);
+      return;
+    }
+
+    $config = json_decode(file_get_contents($configPath), true);
+    $config['active'] = $active;
+
+    file_put_contents(
+      $configPath,
+      json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+
+    Debug::log(
+      "Plugin {$plugin} " . ($active ? 'attivato' : 'disattivato'),
+      'PLUGIN'
+    );
+
+    $this->jsonResponse(true, [
+      'status' => 'ok',
+      'reload' => true
+    ]);
+  }
+  public function ToggleDebugAjax(): void
+  {
+
+    if (!Auth::checkSuperAdmin()) {
+      $this->jsonResponse(false, ['error' => 'Accesso negato']);
+      return;
+    }
+
+    $debug = $_POST['debug'] ?? null;
+    $debug = $debug === '1';
+
+    $configPath = Config::$baseDir . '/ConfigFiles/config.local.json';
+
+    if (!file_exists($configPath)) {
+      $this->jsonResponse(false, ['error' => 'Config non trovata']);
+      return;
+    }
+
+    $config = json_decode(file_get_contents($configPath), true);
+
+    $config['DEBUG_CONSOLE'] = $debug;
+
+    file_put_contents(
+      $configPath,
+      json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+
+    // aggiorna config runtime
+    Config::$DEBUG_CONSOLE = $debug;
+    Flash::AddByKey('system.debug');
+    $this->jsonResponse(true, [
+      'status' => 'ok',
+      'debug'  => $debug
+    ]);
   }
 
   public function Documentazione(...$params): void

@@ -14,11 +14,13 @@ final class Lang
   private static array $pluginPaths = [];
   private static array $availableLangs = ['it', 'en', 'es'];
 
-  // 👇 chiamato dai plugin
   public static function registerPluginLangPath(string $path): void
   {
     if (is_dir($path)) {
       self::$pluginPaths[] = rtrim($path, '/');
+      Debug::log('Registrato path lingua plugin: ' . $path, 'LANG');
+    } else {
+      Debug::log('Path lingua plugin NON valido: ' . $path, 'LANG');
     }
   }
 
@@ -37,18 +39,25 @@ final class Lang
   public static function set(string $lang): void
   {
     self::$lang = $lang ?: 'it';
-
+    Debug::log('Inizializzazione lingua: ' . self::$lang, 'LANG');
     // 1️⃣ carica core
     self::$strings = self::loadLangFile(Config::$baseDir . '/App/Lang', self::$lang);
+
+    Debug::log('Caricate stringhe core per lingua: ' . self::$lang . ' (' . count(self::$strings) . ' chiavi)', 'LANG');
 
     // 2️⃣ carica plugin (sovrascrivono il core)
     foreach (self::$pluginPaths as $pluginLangDir) {
       $pluginStrings = self::loadLangFile($pluginLangDir, self::$lang);
+      Debug::log('Caricate ' . count($pluginStrings) . ' stringhe plugin da ' . $pluginLangDir, 'LANG');
+
+
       self::$strings = array_replace(self::$strings, $pluginStrings);
     }
     Debug::log('Lingua richiesta = ' . $lang, 'LANG');
     // fallback IT
     self::$fallbackStrings = self::loadLangFile(Config::$baseDir . '/App/Lang', self::$fallback);
+
+    Debug::log('Fallback lingua caricato: ' . self::$fallback . ' (' . count(self::$fallbackStrings) . ' chiavi)', 'LANG');
   }
 
   private static function loadLangFile(string $baseDir, string $lang): array
@@ -67,6 +76,11 @@ final class Lang
     $text = self::$strings[$key]
       ?? self::$fallbackStrings[$key]
       ?? $key;
+    if ($text === null) {
+      Debug::log('Chiave traduzione mancante: ' . $key . ' (lang=' . self::$lang . ')', 'LANG');
+    }
+
+
 
     foreach ($params as $k => $v) {
       $text = str_replace('{' . $k . '}', (string)$v, $text);

@@ -36,10 +36,10 @@ class Config
   public static string $assetsDir = '/public';
   public static string $logDir    = __DIR__ . '/../logs';
   public static string $configDir = __DIR__ . '/../ConfigFiles';
-  public static string $site_name       = 'Family Nest';
+  public static string $site_name       = 'Maravel';
   public static string $env       = 'dev';
   public static array $custom_config = [];
-  public static bool $DEBUG_CONSOLE = true;
+  public static bool $DEBUG_CONSOLE = false;
   public static string $Logo_App = "";
   public static string $SALT = "";
   public static string $link_footer = "https://marcodattisi.it";
@@ -106,7 +106,9 @@ class Config
       Debug::log("Errore parsing JSON: $file", 'CONFIG');
       return;
     }
-
+    if (isset($json['DEBUG_CONSOLE'])) {
+      self::$DEBUG_CONSOLE = (bool) $json['DEBUG_CONSOLE'];
+    }
     foreach ($data as $key => $value) {
       if (property_exists(self::class, $key)) {
         $current = self::${$key};

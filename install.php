@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     case 'install':
 
       //header('Content-Type: application/json');
-      echo "Inizio Installazione DB<br />";
+      //echo "Inizio Installazione DB<br />";
       $result = $installer->installDatabase([
         'db_host'    => $_POST['db_host'] ?? 'localhost',
         'db_name'    => $_POST['db_name'] ?? '',
@@ -39,14 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'site_name'  => $_POST['site_name'] ?? 'Gestionale',
         'abs_key'    => $_POST['abs_key'] ?? '',
         'logo_app'   => $_POST['logo_app'] ?? '',
-        'header_api' => $_POST['header_api'] ?? ''
+        'header_api' => $_POST['header_api'] ?? '',
+
       ]);
-      echo "Fine InstallazioneDB <br />";
+      // echo "Fine InstallazioneDB <br />";
       $configPath = dirname(__DIR__, 2) . '/ConfigFiles/config.local.json';
-      var_export($result);
+      //var_export($result);
       if ($result['status'] === 'ok') {
         \Core\Classi\Flash::AddByKey('db.install');
-        echo "Adesso redirect <br />";
+        // echo "Adesso redirect <br />";
         header("Location: /", true, 303);
       } else {
         // 🔥 rollback installazione

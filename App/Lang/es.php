@@ -24,4 +24,7 @@ return [
   'system.error' => 'Se ha producido un error inesperado. Inténtalo de nuevo más tarde.',
   'db.crash' => 'Error durante la conexión a la base de datos.',
   'db.install' => 'Instalación completada con éxito!',
+  'system.debug' => '¡El modo de depuración de la consola se ha cambiado correctamente!',
+  'apri.console.log' => '¡Abre la consola (F12) para ver los registros!',
+
 ];

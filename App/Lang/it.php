@@ -21,6 +21,8 @@ return [
   'system.error' => 'Si è verificato un errore imprevisto. Riprova più tardi.',
   'db.crash' => 'Errore durante la connessione al database.',
   'db.install' => 'Installazione avvenuta con successo!',
+  'system.debug' => 'Modalità debug console cambiata con successo!',
+  'apri.console.log' => 'Apri console log F12 per vedere la console!',
 
 
 ];

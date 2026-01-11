@@ -126,7 +126,7 @@ class TwigService
       'env' => $_ENV['APP_ENV'] ?? 'dev'
     ]);
 
-
+    $twig->addGlobal('DEBUG_CONSOLE', Config::$DEBUG_CONSOLE);
 
     // CSS esterni
 

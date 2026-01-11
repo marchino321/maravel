@@ -110,7 +110,7 @@ $_SESSION['lang'] = $lang;
 Lang::set($lang);
 $twigManager->addGlobal('availableLangs', Lang::available());
 $twigManager->addGlobal('currentLang', Lang::current());
-
+Debug::log("Lingue supporate adesso " . implode(', ', Lang::available()), 'LANG');
 // -------------------------
 // Dispatch della richiesta
 // -------------------------

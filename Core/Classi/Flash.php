@@ -60,6 +60,12 @@ class Flash
       'title' => '💥 Database',
       'body'  => 'db.install'
     ],
+    'system.debug' => [
+      'type'  => self::SUCCESS,
+      'title' => '🐞 Aggiornamento Status',
+      'body'  => 'system.debug'
+    ],
+
   ];
   public static function AddMex(string $testo, string $type = self::DANGER, string $title = ''): void
   {

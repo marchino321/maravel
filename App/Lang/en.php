@@ -24,4 +24,6 @@ return [
   'system.error' => 'An unexpected error occurred. Please try again later.',
   'db.crash' => 'Database connection error.',
   'db.install' => 'Installation completed successfully!',
+  'system.debug' => 'Console debug mode has been successfully updated!',
+  'apri.console.log' => 'Open the console (F12) to view the logs!',
 ];
