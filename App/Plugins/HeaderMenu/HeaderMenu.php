@@ -71,12 +71,32 @@ class HeaderMenu extends PluginController
         "icon"  => "fas fa-cloud-download-alt"
       ],
 
+      // 🔌 GESTIONE PLUGIN
+      [
+        "id"    => "plugins",
+        "label" => "",
+        "url"   => "/private/super-admin/plugins",
+        "roles" => ['SuperAdmin'],
+        "order" => 6,
+        "icon"  => "fas fa-plug"
+      ],
+
+      // 🎨 GESTIONE THEME
+      [
+        "id"    => "themes",
+        "label" => "",
+        "url"   => "/private/super-admin/themes",
+        "roles" => ['SuperAdmin'],
+        "order" => 7,
+        "icon"  => "fas fa-palette"
+      ],
+
       [
         "id"    => "snippets",
         "label" => "",
         "url"   => "/private/docs-controller/index",
         "roles" => ['SuperAdmin'],
-        "order" => 6,
+        "order" => 8,
         "icon"  => "fas fa-code"
       ],
 
