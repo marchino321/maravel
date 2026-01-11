@@ -1,0 +1,95 @@
+<footer class="footer">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6">
+        &copy; 2005 -
+        <script>document.write(new Date().getFullYear())</script>
+        {{ design_footer }}
+        <a href="{{ link_footer }}" target="_blank">{{ label_link }}</a>
+      </div>
+
+      <div class="col-md-6">
+        <div class="text-md-end footer-links d-none d-sm-block">
+          {% block footer_links %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+{# Modal generico #}
+<div class="modal bakScuro fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+  aria-labelledby="staticBackdropLabel" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-scrollable" id="classDialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Body
+      </div>
+      <div class="modal-footer" id="bottoniModal">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary">Qualcosa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Init script - Toastr caricato via ThemeManager #}
+<script type="text/javascript">
+  $(document).ready(function () {
+    // Aggiungi asterisco ai campi required
+    $('div:has(input[required]) > label.form-label')
+      .after('<span class="text-danger">&nbsp; *</span>');
+    $('div:has(select[required]) > label.form-label')
+      .after('<span class="text-danger">&nbsp; *</span>');
+
+    // Configurazione Toastr
+    toastr.options = {
+      "closeButton": true,
+      "debug": false,
+      "newestOnTop": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": false,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "10000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    };
+
+    // Flash messages
+    {% set messages = flash_messages() %}
+    {% if messages is not empty %}
+    {% for msg in messages %}
+    {% set type = msg.type |default ('info') %}
+    toastr["success"](
+      "{{ __(msg.body)|default(msg|join(', ')) }}",
+      "{{ __(msg.title)|default('N/D') }}"
+    );
+    {% endfor %}
+    {{ clear_flash_messages() }}
+    {% endif %}
+
+    // Init Select2
+    $('[data-toggle="select2"]').select2();
+
+    // Init funzione soldi
+    if (typeof soldiClass === 'function') {
+      soldiClass();
+    }
+
+    // Nascondi loader
+    setTimeout(function() {
+      $("#loading").fadeOut("slow", function () {
+        $(this).hide();
+      });
+    }, 500);
+  });
+</script>

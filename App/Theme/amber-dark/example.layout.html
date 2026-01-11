@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <title>{% block title %}{% endblock %} | {{ NomeApp | default('Gestionale in Costruzione') }}</title>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   {{ theme_head_before() }}
 
   {# Extra CSS specifici della pagina #}
@@ -13,8 +14,7 @@
   {{ theme_head_after() }}
 </head>
 
-<body class="loading {% block classBody %}{% endblock %}"
-  data-layout='{{ DefaultSetting|default("{\"mode\":\"light\",\"width\":\"fluid\",\"menuPosition\":\"fixed\",\"sidebar\":{\"color\":[\"dark\"]},\"topbar\":{\"color\":[\"dark\"]},\"showRightSidebarOnPageLoad\":true}")|raw }}'>
+<body class="loading {% block classBody %}{% endblock %}">
 
   {# Loader #}
   {% set Loader = include('includesTemplate/loader.html') %}
