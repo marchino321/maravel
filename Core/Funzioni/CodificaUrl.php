@@ -3,7 +3,7 @@
 use App\Config;
 
 if (!defined("CLI_MODE")) {
-    defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
+  defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
 }
 /**
  * Codifica una stringa in base64 url-safe
@@ -15,9 +15,9 @@ if (!defined("CLI_MODE")) {
  */
 function url_codifica(string $string): string
 {
-    $data = base64_encode($string);
-    $data = str_replace(['+', '/', '='], ['-', '_', ''], $data);
-    return $data;
+  $data = base64_encode($string);
+  $data = str_replace(['+', '/', '='], ['-', '_', ''], $data);
+  return $data;
 }
 
 /**
@@ -30,13 +30,18 @@ function url_codifica(string $string): string
  */
 function url_decodifica(string $string): string
 {
-    $data = str_replace(['-', '_'], ['+', '/'], $string);
+  $data = str_replace(['-', '_'], ['+', '/'], $string);
 
-    // Ripristina il padding base64
-    $mod4 = strlen($data) % 4;
-    if ($mod4) {
-        $data .= substr('====', $mod4);
-    }
+  // Ripristina il padding base64
+  $mod4 = strlen($data) % 4;
+  if ($mod4) {
+    $data .= substr('====', $mod4);
+  }
 
-    return base64_decode($data);
+  return base64_decode($data);
+}
+
+function back()
+{
+  return;
 }

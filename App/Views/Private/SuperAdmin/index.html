@@ -111,17 +111,27 @@
   <div class="col-md-3 form-group">
     <div class="card">
       <div class="card-header text-warning text-uppercase">
-        Modalità
+        Theme
       </div>
       <div class="card-body stat-card">
         <div class="value">
-          {% if DEBUG_CONSOLE %}
-          🧪 SVILUPPO
-          {% else %}
-          🚀 PRODUZIONE
-          {% endif %}
+          {{ 'inizio' | startForm('/private/super-admin/switch-theme', 'false') | raw }}
+          <select name="theme" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">
+              [ SCEGLI UN THEMA ]
+            </option>
+            {% for theme in availableThemes %}
+            <option value="{{ theme }}" {% if theme==currentTheme %}selected{% endif %}>
+              {{ theme|capitalize }}
+            </option>
+            {% endfor %}
+          </select>
+
+
+          {{ 'fine' | startForm() | raw }}
         </div>
-        <div class="label text-warning">Modalità Framework</div>
+
+        <div class="label text-warning">Tema attivo ({{ currentTheme }})</div>
       </div>
     </div>
   </div>

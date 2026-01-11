@@ -405,4 +405,68 @@ class SuperAdmin extends Controller
       'output' => trim($output)
     ]);
   }
+  public function SwitchTheme(...$params)
+  {
+    $theme = $_POST['theme'] ?? null;
+
+    // 🔴 tema mancante o vuoto
+    if (!$theme || !is_string($theme)) {
+      Flash::AddMex('Tema non valido');
+      header('Location: /private/super-admin', true, 303);
+      exit;
+    }
+
+    $themeDir = Config::$baseDir . '/App/Theme/' . $theme;
+
+    if (!is_dir($themeDir)) {
+      Flash::AddMex('Il tema selezionato non esiste');
+      exit;
+    }
+
+    $configFile = Config::$baseDir . '/ConfigFiles/config.local.json';
+
+    if (!file_exists($configFile)) {
+      Flash::AddMex('File di configurazione non trovato');
+      exit;
+    }
+
+    // 🔒 lock del file
+    $fp = fopen($configFile, 'c+');
+    if (!$fp) {
+      Flash::AddMex('Impossibile aprire il file di configurazione');
+      exit;
+    }
+
+    flock($fp, LOCK_EX);
+
+    $json = stream_get_contents($fp);
+    $config = json_decode($json, true);
+
+    if (!is_array($config)) {
+      flock($fp, LOCK_UN);
+      fclose($fp);
+      Flash::AddMex('Configurazione JSON non valida');
+      exit;
+    }
+
+    // ✅ aggiorna il tema
+    $config['THEME'] = $theme;
+
+    // ✍️ riscrive il file
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite(
+      $fp,
+      json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    Flash::AddMex("Tema $theme attivato correttamente", Flash::SUCCESS, "Thema Salvato");
+
+    header('Location: /private/super-admin', true, 303);
+    exit;
+  }
 }

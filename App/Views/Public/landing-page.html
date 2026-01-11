@@ -9,23 +9,18 @@
   <meta content="Marco Dattisi" name="author" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <link rel="gestionale icon" href="{{ Logo_App }}">
-  {% if css_files is defined %}
-  {% for css in css_files %}
-  <link rel="stylesheet" href="{{ css.url }}" id="{{ css.id }}">
-  {% endfor %}
-  {% endif %}
+  {{ theme_head_before() }}
 
-  {# ===================== JS HEAD ===================== #}
-  {% if js_head_files is defined %}
-  {% for js in js_head_files %}
-  <script src="{{ js.file }}" id="{{ js.id }}"></script>
-  {% endfor %}
-  {% endif %}
+  {# Extra CSS specifici della pagina #}
+  {% block css %}{% endblock %}
+  {{ theme_head_after() }}
 
 </head>
 
 <body class="loading">
-
+  {# Loader #}
+  {% set Loader = include('includesTemplate/loader.html') %}
+  {{ Loader | raw }}
   <div class="mt-5 mb-5">
     <div class="container">
       <div class="row">
@@ -120,20 +115,20 @@
     </div>
   </div>
 
+  {{ theme_body_after() }}
   {# ===================== JS FOOTER ===================== #}
-  {% if js_files is defined %}
-  {% for js in js_files %}
-  <script src="{{ js.file }}" id="{{ js.id }}"></script>
-  {% endfor %}
-  {% endif %}
+  {{ theme_footer_before() }}
 
-  {# Inline JS (registrati direttamente) #}
-  {% if inline_js is defined %}
-  {% for js in inline_js %}
-  <script>{ { js | raw } }</script>
-  {% endfor %}
-  {% endif %}
 
+
+
+  {# JS specifici della pagina #}
+  {% block Script %}{% endblock %}
+
+  <script>
+    window.CSRF_TOKEN = "{{ csrf_token() }}";
+  </script>
+  {{ theme_footer_after() }}
 </body>
 
 </html>

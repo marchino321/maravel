@@ -85,7 +85,12 @@ class TwigService
     foreach ($filters as $filter) {
       $twig->addFilter($filter);
     }
+    $twig->addGlobal('currentTheme', ThemeManager::$theme);
 
+    $twig->addGlobal('availableThemes', array_map(
+      'basename',
+      glob(Config::$baseDir . '/App/Theme/*', GLOB_ONLYDIR)
+    ));
     $twig->addGlobal('css_files', AssetHelper::getCss());
     $twig->addGlobal('js_files', AssetHelper::getJs());
     $twig->addGlobal('inline_js', AssetHelper::getInlineJs());

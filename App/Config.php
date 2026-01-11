@@ -48,7 +48,7 @@ class Config
   public static string $LinkMain = "https://hd.marcodattisi.it";
   public static string $LinkUpdate = "hd.marcodattisi.it";
   public static string $ABS_KEY = "MARAVEL2026";
-
+  public static string $THEME = 'default';
   public static string $LOGO_APPINTESTAZIONE_PDF = "";
 
   public static string $client_key_wc = "";
