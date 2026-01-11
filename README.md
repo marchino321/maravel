@@ -18,22 +18,36 @@ It is built for developers who want **full control over their code**, without gi
 > It is an independent framework, inspired by modern concepts, but built for practical needs and real projects.
 
 ---
-
 ## ✨ Key Features
-
-- ✅ **True MVC architecture**
-- ✅ Clear **Core / App** separation
-- ✅ **First-class Plugin system**
-- ✅ Integrated **Event Manager**
-- ✅ **Twig** support
-- ✅ Simple and readable custom router
-- ✅ Centralized authentication
-- ✅ Flash messages
-- ✅ Dedicated CLI
-- ✅ **Centralized core update system**
-- ✅ **PHP 8.3 / 8.4 ready**
-- ✅ Designed for multi-project setups and controlled distribution
-- ✅ Built-in multilingual system with plugin-based global language packs
+	•	✅ True MVC architecture
+	•	✅ Clear Core / App separation
+	•	✅ First-class Plugin system (install / enable / disable ready)
+	•	✅ Theme system with hooks (WordPress-style: head / body / footer)
+	•	✅ Multiple themes support with runtime switching
+	•	✅ Centralized ThemeManager with dependency-aware asset loading
+	•	✅ Integrated Event Manager (domain & system events)
+	•	✅ Twig templating engine with custom globals, filters & functions
+	•	✅ Hook-based templating (themes inject layout parts without overriding views)
+	•	✅ Simple, readable and extensible custom router
+	•	✅ Centralized authentication & role system
+	•	✅ Dynamic menu system based on permissions
+	•	✅ Flash messages & notifications
+	•	✅ Built-in AJAX helper layer
+	•	✅ Dedicated CLI tools
+	•	✅ Centralized core update system (file & ZIP based, with rollback)
+	•	✅ Safe automatic backups during updates
+	•	✅ Migration system
+	•	First install via SQL snapshot (LastDb.sql)
+	•	Project-specific PHP migrations (up / down)
+	•	✅ Environment-aware error handling
+	•	Developer debug console
+	•	Production-safe Twig error pages
+	•	✅ Centralized configuration via JSON
+	•	✅ Built-in CSRF protection
+	•	✅ Multilingual system with plugin-based global language packs
+	•	✅ PHP 8.3 / 8.4 ready
+	•	✅ Designed for multi-project setups and controlled distribution
+	•	✅ Open-basedir safe filesystem handling
 
 
 ## 📁 Project Structure
