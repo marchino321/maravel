@@ -33,8 +33,8 @@ It is built for developers who want **full control over their code**, without gi
 - ✅ **Centralized core update system**
 - ✅ **PHP 8.3 / 8.4 ready**
 - ✅ Designed for multi-project setups and controlled distribution
+- ✅ Built-in multilingual system with plugin-based global language packs
 
----
 
 ## 📁 Project Structure
 
