@@ -16,6 +16,7 @@ use Core\View\TwigManager;
 use Core\Classi\Menu;
 use Core\Classi\TwigService;
 use Core\Lang;
+use Core\View\CoreAssets;
 use Core\View\ThemeManager;
 
 // -------------------------
@@ -60,9 +61,10 @@ if (!$isApi) {
 
   $menu        = new Menu($menuManager);
   $menu->menuAdmin(); // per admin
-
+  CoreAssets::register();
   ThemeManager::boot();
   ThemeManager::loadFunctions();
+
   $twigManager = new TwigManager();
   $twig        = TwigService::init($menuManager);
   ThemeManager::setTwig($twig);
