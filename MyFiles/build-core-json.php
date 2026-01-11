@@ -133,6 +133,9 @@ scanDirRecursive($coreDir, $baseDir, $coreJson, $myFilesDir, $baseUrl);
 $fixedFiles = [
   'install.php',
   'cli.php',
+  'index.php',
+  'ConfigFiles/bootstrap.php'
+
 ];
 
 foreach ($fixedFiles as $file) {
