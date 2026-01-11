@@ -19,8 +19,8 @@ It is built for developers who want **full control over their code**, without gi
 
 ---
 ## ✨ Key Features
-	-  ✅ True MVC architecture
-	-  ✅ Clear Core / App separation
+	-	✅ True MVC architecture
+	-	✅ Clear Core / App separation
 	-	✅ First-class Plugin system (install / enable / disable ready)
 	-	✅ Theme system with hooks (WordPress-style: head / body / footer)
 	-	✅ Multiple themes support with runtime switching
