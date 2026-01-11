@@ -45,16 +45,24 @@ class Error
     // Gestione shutdown per errori fatali
     register_shutdown_function(function (): void {
       $error = error_get_last();
-      if ($error !== null) {
-        $e = new \ErrorException(
-          $error['message'],
-          0,
-          $error['type'],
-          $error['file'],
-          $error['line']
-        );
-        self::handle($e);
+
+      if ($error === null) {
+        return;
       }
+
+      if (!in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        return;
+      }
+
+      $e = new \ErrorException(
+        $error['message'],
+        0,
+        $error['type'],
+        $error['file'],
+        $error['line']
+      );
+
+      self::handle($e);
     });
 
     Debug::log("🛠 Error handler inizializzato", 'ERROR');
@@ -67,44 +75,61 @@ class Error
    */
   public static function handle(\Throwable $e): void
   {
-    // Modalità DEBUG → mostra dettagli
+    http_response_code(500);
+
     if (Config::$DEBUG_CONSOLE === true) {
+
       Debug::log("❌ Errore (DEBUG attivo): " . $e->getMessage(), 'ERROR');
 
-      //http_response_code(500);
-      echo "<pre style='background:#111;color:#fff;padding:10px;border-radius:5px'>";
-      echo "🚨 " . get_class($e) . "\n\n";
-      echo "Messaggio: " . $e->getMessage() . "\n";
-      echo "File: " . $e->getFile() . "\n";
-      echo "Linea: " . $e->getLine() . "\n";
-      echo "Trace:\n" . $e->getTraceAsString();
-      echo "</pre>";
-    }
-    // Modalità produzione → log + pagina Twig
-    else {
-      $logFile = Config::$logDir . '/error.log';
-      $logMessage = "[" . date('Y-m-d H:i:s') . "] " .
-        "Errore: " . $e->getMessage() .
-        " in " . $e->getFile() . " alla linea " . $e->getLine() . "\n" .
-        $e->getTraceAsString() . "\n";
+      $exceptionClass = get_class($e);
+      $message = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+      $file    = $e->getFile();
+      $line    = $e->getLine();
+      $trace   = htmlspecialchars($e->getTraceAsString(), ENT_QUOTES, 'UTF-8');
 
-      // Scrittura log
-      error_log($logMessage, 3, $logFile);
-      Debug::log("❌ Errore registrato in produzione: " . $e->getMessage(), 'ERROR');
+      echo <<<HTML
+<style>
+  body{background:#2e3b54;margin:0}
+  .mf-error-box{
+    background:#0e1117;color:#e6edf3;
+    padding:20px;margin:20px;
+    border-radius:8px;
+    font-family:ui-monospace,monospace;
+    box-shadow:0 0 0 1px #30363d
+  }
+  .mf-error-title{font-size:18px;color:#ff6b6b;margin-bottom:12px}
+  .mf-error-meta{font-size:13px;color:#9da7b1}
+  .mf-error-meta span{display:block}
+  .mf-error-trace{
+    background:#161b22;padding:10px;border-radius:6px;
+    font-size:12px;max-height:300px;overflow:auto;white-space:pre-wrap
+  }
+</style>
 
-      http_response_code(500);
-
-      if (self::$twigManager) {
-        echo self::$twigManager->getTwig()->render('Error/Errors.html', [
-          'title' => 'Errore 500',
-          'messaggio' => '💥 Errore interno',
-          'risposta' => Config::$DEBUG_CONSOLE ? $e->getMessage() : '',
-        ]);
-      } else {
-        echo "<h1>Errore 500</h1><p>💥 Errore interno</p>";
-      }
-
+<div class="mf-error-box">
+  <div class="mf-error-title">🚨 Unhandled Exception</div>
+  <div class="mf-error-meta">
+    <span><b>Type:</b> {$exceptionClass}</span>
+    <span><b>Message:</b> {$message}</span>
+    <span><b>File:</b> {$file}</span>
+    <span><b>Line:</b> {$line}</span>
+  </div>
+  <h4 style="color:#58a6ff">Stack trace</h4>
+  <div class="mf-error-trace">{$trace}</div>
+</div>
+HTML;
       exit;
     }
+
+    // PRODUZIONE
+    Debug::log("❌ Errore produzione: " . $e->getMessage(), 'ERROR');
+
+    if (self::$twigManager) {
+      echo self::$twigManager->getTwig()->render('Error/Errors.html');
+    } else {
+      echo "<h1>Errore 500</h1>";
+    }
+
+    exit;
   }
 }
