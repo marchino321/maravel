@@ -14,6 +14,7 @@ use Core\Helpers\AssetHelper;
 use Core\Helpers\Csrf;
 use Core\Helpers\LangHelper;
 use Core\Lang;
+use Core\View\ThemeManager;
 
 if (!defined("CLI_MODE")) {
   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
@@ -24,7 +25,11 @@ class TwigService
   {
     $viewsCore = realpath(__DIR__ . '/../../App/Views');
     $loader = new FilesystemLoader($viewsCore);
-
+    /** @var \Twig\Loader\FilesystemLoader $loader */
+    $loader->addPath(
+      ThemeManager::$basePath,
+      'theme'
+    );
     $twig = new Environment($loader, [
       'debug' => true,
       'cache' => __DIR__ . '/../cache/twig',
@@ -146,7 +151,41 @@ class TwigService
 
     $twig->addFunction(new \Twig\TwigFunction('lang_flag', fn($l) => LangHelper::flag($l)));
     $twig->addFunction(new \Twig\TwigFunction('lang_label', fn($l) => LangHelper::label($l)));
+    $twig->addFunction(new TwigFunction(
+      'theme_head_before',
+      fn() => ThemeManager::render('head.before'),
+      ['is_safe' => ['html']]
+    ));
 
+    $twig->addFunction(new TwigFunction(
+      'theme_head_after',
+      fn() => ThemeManager::render('head.after'),
+      ['is_safe' => ['html']]
+    ));
+
+    $twig->addFunction(new TwigFunction(
+      'theme_body_before',
+      fn() => ThemeManager::render('body.before'),
+      ['is_safe' => ['html']]
+    ));
+
+    $twig->addFunction(new TwigFunction(
+      'theme_body_after',
+      fn() => ThemeManager::render('body.after'),
+      ['is_safe' => ['html']]
+    ));
+
+    $twig->addFunction(new TwigFunction(
+      'theme_footer_before',
+      fn() => ThemeManager::render('footer.before'),
+      ['is_safe' => ['html']]
+    ));
+
+    $twig->addFunction(new TwigFunction(
+      'theme_footer_after',
+      fn() => ThemeManager::render('footer.after'),
+      ['is_safe' => ['html']]
+    ));
 
 
     return $twig;

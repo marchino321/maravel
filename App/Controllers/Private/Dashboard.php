@@ -22,6 +22,7 @@ class Dashboard extends Controller
   //cs_e0dd441a0970058e3a6b897b604e3525d945876b client_secret
   public function Index(...$params): void
   {
+
     Flash::AddByKey('insert.ok');
     $ritorno['Titolo'] = "Dashboard";
     echo $this->twigManager->getTwig()->render('Private/Dashboard/index.html', $ritorno);

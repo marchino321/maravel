@@ -5,11 +5,15 @@ namespace App\Plugins\HeaderMenu;
 use Core\PluginController;
 use App\Debug;
 use Core\Auth;
+use Core\View\ThemeManager;
+use Core\Router;
+use Core\View\TwigManager;
+use Core\View\MenuManager;
 
 class HeaderMenu extends PluginController
 {
   private HeaderMenuManager $headerMenu;
-
+  private TwigManager $twigManager;
   public function __construct()
   {
     parent::__construct();
@@ -19,6 +23,7 @@ class HeaderMenu extends PluginController
     if (Auth::checkSuperAdmin()) {
       $userRoles = ['SuperAdmin'];
     }
+
     $this->headerMenu = new HeaderMenuManager($userRoles, [
 
       [
@@ -79,9 +84,13 @@ class HeaderMenu extends PluginController
 
     Debug::log("🔌 Plugin HeaderMenu caricato", "HEADER-MENU");
   }
-
+  public function register(Router $router, TwigManager $twigManager, ?MenuManager $menuManager = null): void
+  {
+    ThemeManager::addOnce('body.after', '<div id="toast-root"></div>');
+  }
   public function getMenu(): array
   {
+
     return $this->headerMenu->renderForTwig();
   }
 }

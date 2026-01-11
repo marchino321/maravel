@@ -16,6 +16,7 @@ use Core\View\TwigManager;
 use Core\Classi\Menu;
 use Core\Classi\TwigService;
 use Core\Lang;
+use Core\View\ThemeManager;
 
 // -------------------------
 // Config e bootstrap
@@ -60,9 +61,11 @@ if (!$isApi) {
   $menu        = new Menu($menuManager);
   $menu->menuAdmin(); // per admin
 
-
+  ThemeManager::boot();
+  ThemeManager::loadFunctions();
   $twigManager = new TwigManager();
   $twig        = TwigService::init($menuManager);
+  ThemeManager::setTwig($twig);
   $twigManager->setTwig($twig);
 
   // Variabili globali Twig
@@ -73,9 +76,6 @@ if (!$isApi) {
   $twigManager->addGlobal('label_link', Config::$label_link);
   $twigManager->addGlobal('design_footer', Config::$design_footer);
   $twigManager->addGlobal('debug', Config::$DEBUG_CONSOLE);
-
-  // Assets globali
-  bootstrapAssets($twigManager);
 } else {
   Debug::log("🌐 Richiesta API → skip Twig/Menu", 'APP');
 }

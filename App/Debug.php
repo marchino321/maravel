@@ -25,6 +25,7 @@ class Debug
     'PERMESSI'   => ['label' => '[PERMESSI]',   'emoji' => '🔑', 'color' => '#f3a7e8ff'],
     'SESSIONE'   => ['label' => '[SESSIONE]',   'emoji' => '🪪', 'color' => '#fd7e14'],
     'LANG'       => ['label' => '[LANG]',       'emoji' => '🌍', 'color' => '#17a2b8'],
+    'THEME'      => ['label' => '[THEME]',      'emoji' => '🎨', 'color' => '#6f42c1'],
   ];
   public static function getAndClearLogs(): array
   {
