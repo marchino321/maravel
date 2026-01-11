@@ -153,6 +153,7 @@ $fixedDirs = [
   'App/Views/Error',
   'App/Plugins/HeaderMenu',
   'App/Plugins/PluginServizio',
+  'App/Lang',
 ];
 
 foreach ($fixedDirs as $dir) {
