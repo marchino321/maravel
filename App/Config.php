@@ -128,7 +128,5 @@ class Config
         Debug::log("Configurazione caricata da JSON: $key", 'CONFIG');
       }
     }
-
-    Debug::log("Configurazione JSON processata: $file", 'CONFIG');
   }
 }

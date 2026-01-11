@@ -60,7 +60,7 @@ if (!$isApi) {
 
   $menu        = new Menu($menuManager);
   $menu->menuAdmin(); // per admin
-  Debug::log('THEME da Config = ' . (Config::$THEME ?? 'NULL'), 'THEME');
+
   ThemeManager::boot();
   ThemeManager::loadFunctions();
   $twigManager = new TwigManager();

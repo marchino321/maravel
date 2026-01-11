@@ -226,7 +226,7 @@ final class ThemeManager
     $functions = self::$basePath . '/functions.php';
 
     if (file_exists($functions)) {
-      Debug::log('Caricamento functions.php tema', 'THEME');
+
       require_once $functions;
     } else {
       Debug::log('Nessun functions.php trovato nel tema', 'THEME');

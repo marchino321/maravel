@@ -59,9 +59,6 @@ Debug::log("✅ Caricate funzioni custom", 'APP');
 $configFile = __DIR__ . '/../ConfigFiles/config.local.json';
 if (!file_exists($configFile)) {
   Debug::log("⚠️ File config mancante: $configFile", 'ERROR');
-} else {
-  Config::loadFromJson($configFile);
-  Debug::log("✅ Configurazione caricata da: $configFile", 'CONFIG');
 }
 
 Config::runHooks();
