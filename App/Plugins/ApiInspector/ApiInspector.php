@@ -42,6 +42,7 @@ class ApiInspector extends PluginController
       // \App\Debug::log('DOPO addMenuItem, count=' . count($menuManager->getMenu()), 'API-INSPECTOR');
     }
     $router->addPluginRoute('api-inspector', function () use ($twigManager) {
+      Page::setTitle('Api Inspector');
       echo $twigManager->getTwig()->render(
         '@ApiInspector/index.html',
         ['apis' => ApiAnalyzer::scan()]
