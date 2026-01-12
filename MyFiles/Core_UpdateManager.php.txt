@@ -24,48 +24,19 @@ class UpdateManager
   {
     $this->versionFile  = Config::$configDir . '/update.json';
     $this->updateServer = "https://hd.marcodattisi.it/MyFiles/core.json";
-    // $systemDir = $_SERVER['DOCUMENT_ROOT'] . '/_system';
-
-    // if (!is_dir($systemDir)) {
-    //   mkdir($systemDir, 0777, true);
-    //   Debug::log("📁 Directory _system creata", 'UPDATE');
-    // }
-
     $this->backupDir = Config::$systemDir . '/backups';
     $this->lockFile  = Config::$systemDir . '/.update_lock';
   }
 
   /**
-   * Normalizza un path e garantisce che resti dentro DOCUMENT_ROOT
-   */
-  private function safePath(string $path): string
-  {
-    $realBase = realpath($_SERVER['DOCUMENT_ROOT']);
-    $realPath = realpath($path);
-
-    if ($realPath === false) {
-      return $_SERVER['DOCUMENT_ROOT'] . '/_system/' . basename($path);
-    }
-
-    // se il path esce da public_html → fallback automatico
-    if ($realBase && !str_starts_with($realPath, $realBase)) {
-      Debug::log("⚠️ Path fuori open_basedir, fallback applicato: {$path}", 'UPDATE');
-
-      return $realBase . '/_system/' . basename($path);
-    }
-
-    return $path;
-  }
-  /**
    * Garantisce che la directory del file esista
    */
   private function ensureDirectory(string $filePath): void
   {
-    $dir = is_dir($filePath) ? $filePath : dirname($filePath);
-
+    $dir = dirname($filePath);
     if (!is_dir($dir)) {
-      mkdir($dir, 0755, true);
-      Debug::log("📁 Directory creata: {$dir}", 'UPDATE');
+      mkdir($dir, 0777, true);
+      Debug::log("📁 Creata directory: {$dir}", 'UPDATE');
     }
   }
 
@@ -302,7 +273,9 @@ class UpdateManager
    */
   private function lock(): void
   {
-    file_put_contents($this->lockFile, (string) getmypid());
+    // ✅ FIX 4: directory lock garantita
+    $this->ensureDirectory($this->lockFile);
+    file_put_contents($this->lockFile, (string)getmypid());
   }
 
   private function unlock(): void
@@ -314,6 +287,7 @@ class UpdateManager
 
   private function isLocked(): bool
   {
+    $this->ensureDirectory($this->lockFile);
     return file_exists($this->lockFile);
   }
 

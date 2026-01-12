@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}{% endblock %} | {{ NomeApp | default('Gestionale in Costruzione') }}</title>
+  <title>{{ page_title() }} | {{ NomeApp | default('Gestionale in Costruzione') }}</title>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   {{ theme_head_before() }}
 
   {# Extra CSS specifici della pagina #}
@@ -31,7 +32,7 @@
           <div id="messaggiAjax">
 
           </div>
-          {# Contenuto principale #}
+
           {% block Body %}{% endblock %}
         </div>
       </div>
@@ -41,7 +42,7 @@
   </div>
   {# ===================== JS FOOTER ===================== #}
   {{ theme_footer_before() }}
-  {# JS specifici della pagina #}
+
   {% block Script %}{% endblock %}
   <script>
     window.CSRF_TOKEN = "{{ csrf_token() }}";

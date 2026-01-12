@@ -2,5 +2,6 @@
     "name": "Plug-in di servizio",
     "author": "Marco Dattisi",
     "active": true,
-    "description": "Plugin di esempio"
+    "description": "Plugin di esempio",
+    "version":"1.0.0"
 }

@@ -15,7 +15,7 @@ use Core\UpdateManager;
 use Core\View\TwigManager;
 use Core\View\MenuManager;
 use Core\Services\SystemInfoService;
-
+use Core\View\Page;
 
 if (!defined("CLI_MODE")) {
   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
@@ -43,7 +43,7 @@ class SuperAdmin extends Controller
 
 
     $service = new SystemInfoService();
-
+    Page::setTitle('⚙️ Impostazioni Super Admin');
     $data = $service->getSystemInfo();
     $data['debug'] = $service->isDebugEnabled() ? 'true' : 'false';
     $data['log']   = $service->listLogs();
@@ -65,7 +65,6 @@ class SuperAdmin extends Controller
     echo $this->twigManager->getTwig()->render(
       'Private/SuperAdmin/index.html',
       [
-        'Titolo'       => 'Setting Super Admin',
         'data'         => $data,
         'php_sapi'     => php_sapi_name(),
         'core_version' => $coreVersion,
@@ -76,6 +75,45 @@ class SuperAdmin extends Controller
       ]
     );
   }
+  public function Plugins(...$params)
+  {
+    if (!Auth::checkSuperAdmin()) {
+      Flash::AddMex('Accesso negato');
+      header('Location: /private/dashboard', true, 303);
+      exit;
+    }
+
+    $plugins = [];
+
+    $pluginDir = Config::$pluginDir;
+
+    foreach (glob($pluginDir . '/*', GLOB_ONLYDIR) as $dir) {
+      $name = basename($dir);
+      $configFile = $dir . '/config.json';
+
+      if (!file_exists($configFile)) {
+        continue;
+      }
+
+      $config = json_decode(file_get_contents($configFile), true);
+
+      $plugins[] = [
+        'name'        => $name,
+        'label'       => $config['label'] ?? $name,
+        'description' => $config['description'] ?? '',
+        'version'     => $config['version'] ?? '—',
+        'active'      => (bool)($config['active'] ?? false),
+
+      ];
+    }
+    Page::setTitle('🧩 Plugin installati');
+
+    echo $this->twigManager->getTwig()->render('Private/SuperAdmin/plugins.html', [
+      'plugins' => $plugins,
+
+    ]);
+  }
+
   public function togglePluginAjax(): void
   {
 
@@ -150,6 +188,7 @@ class SuperAdmin extends Controller
 
   public function Documentazione(...$params): void
   {
+    Page::setTitle('📘 Documentazione Super Admin');
     echo $this->twigManager->getTwig()->render('Private/SuperAdmin/documentazione-base.html', [
       'Titolo' => 'Setting Super Admin',
 
@@ -173,6 +212,7 @@ class SuperAdmin extends Controller
   public function aggiornamenti(): void
   {
     $updateManager = new UpdateManager();
+    Page::setTitle('⬆️ Sistema di Aggiornamento');
     $coreInfo = $updateManager->checkForUpdates();
 
     // Per ora mock plugin
@@ -257,7 +297,7 @@ class SuperAdmin extends Controller
   public function MigrazioniDatabase(): void
   {
     $mm = new MigrationManager();
-
+    Page::setTitle('🗄️ Migrazioni Database');
     $sqlDir = Config::$baseDir . '/MigrationsSQL';
     $sqlFiles = [];
 
@@ -271,7 +311,6 @@ class SuperAdmin extends Controller
     echo $this->twigManager->getTwig()->render(
       'Private/SuperAdmin/migrazioni_db.html',
       [
-        'Titolo'        => 'Migrazioni Database',
         'migrations'    => $mm->getAllMigrations(),
         'cliCommand'    => 'php cli.php migrate',
         'sqlExportPath' => '/MigrationsSQL',
@@ -349,7 +388,7 @@ class SuperAdmin extends Controller
 
   public function EsportaProgetto(...$params): void
   {
-
+    Page::setTitle('📦 Esporta Progetto');
 
     echo $this->twigManager->getTwig()->render('Private/SuperAdmin/export.html', [
       'Titolo' => 'Esporta Progetto'
@@ -367,6 +406,7 @@ class SuperAdmin extends Controller
   }
   public function Snipped(...$params)
   {
+    Page::setTitle('🧪 Snippet & Codice');
     echo $this->twigManager->getTwig()->render('Docs/Index.html', [
       'Titolo' => 'Esporta Progetto'
     ]);
@@ -420,6 +460,63 @@ class SuperAdmin extends Controller
       'output' => trim($output)
     ]);
   }
+  public function Themes(...$params)
+  {
+    if (!Auth::checkSuperAdmin()) {
+      Flash::AddMex('Accesso negato');
+      header('Location: /private/dashboard', true, 303);
+      exit;
+    }
+    Page::setTitle('🎨 Gestione Temi');
+    $themesDir = Config::$baseDir . '/App/Theme';
+    $current   = Config::$THEME;
+
+    $themes = [];
+
+    foreach (scandir($themesDir) as $dir) {
+      if ($dir === '.' || $dir === '..') {
+        continue;
+      }
+
+      $themePath = $themesDir . '/' . $dir;
+      if (!is_dir($themePath)) {
+        continue;
+      }
+
+      $jsonFile = $themePath . '/theme.json';
+
+      // 🔴 theme.json mancante
+      if (!file_exists($jsonFile)) {
+        Debug::log("Theme senza theme.json: {$dir}", 'THEME');
+        continue;
+      }
+
+      $json = json_decode(file_get_contents($jsonFile), true);
+
+      // 🔴 JSON non valido
+      if (!is_array($json)) {
+        Debug::log("theme.json non valido: {$dir}", 'THEME');
+        continue;
+      }
+
+      $themes[] = [
+        'id'          => $dir,                         // ← NOME CARTELLA
+        'name'        => $json['name'] ?? $dir,
+        'description' => $json['description'] ?? '',
+        'version'     => $json['version'] ?? '',
+        'author'      => $json['author'] ?? '',
+        'active'      => ($dir === $current),
+      ];
+    }
+
+    echo $this->twigManager->getTwig()->render(
+      'Private/SuperAdmin/themes.html',
+      [
+        'themes' => $themes,
+        'Titolo' => "Themes"
+      ]
+    );
+  }
   public function SwitchTheme(...$params)
   {
     $theme = $_POST['theme'] ?? null;
@@ -427,7 +524,7 @@ class SuperAdmin extends Controller
     // 🔴 tema mancante o vuoto
     if (!$theme || !is_string($theme)) {
       Flash::AddMex('Tema non valido');
-      header('Location: /private/super-admin', true, 303);
+      header('Location: /private/super-admin/themes', true, 303);
       exit;
     }
 
@@ -481,7 +578,7 @@ class SuperAdmin extends Controller
 
     Flash::AddMex("Tema $theme attivato correttamente", Flash::SUCCESS, "Thema Salvato");
 
-    header('Location: /private/super-admin', true, 303);
+    header('Location: /private/super-admin/themes', true, 303);
     exit;
   }
 }

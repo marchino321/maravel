@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% block title %}{{ Titolo }}{% endblock %}
+{% block Body %}
+
+<div class="row">
+  {% for theme in themes %}
+  <div class="col-md-4">
+    <div class="card {% if theme.active %}border-success{% endif %}">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>{{ theme.name }}</strong>
+        {% if theme.active %}
+        <span class="badge bg-success">Attivo</span>
+        {% endif %}
+      </div>
+
+      <div class="card-body">
+        <p class="text-muted mb-1">
+          {{ theme.description ?: 'Nessuna descrizione' }}
+        </p>
+
+        <small class="text-muted">
+          Versione: <span class="text-info"><u>{{ theme.version ?: '—' }}</u></span><br>
+          Autore: <span class="text-success"><u>{{ theme.author ?: '—' }}</u></span>
+        </small>
+      </div>
+
+      <div class="card-footer text-end">
+        {% if not theme.active %}
+        {{ 'inizio' | startForm('/private/super-admin/switch-theme', 'false') | raw }}
+        <input type="hidden" name="theme" value="{{ theme.id }}">
+        <button class="btn btn-sm btn-outline-primary">
+          Attiva tema
+        </button>
+        {{ 'fine' | startForm() | raw }}
+        {% else %}
+        <button class="btn btn-sm btn-success" disabled>
+          Tema attivo
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block Script %}
+<script>
+  document.querySelectorAll('form[action*="switch-theme"]').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const theme = this.querySelector('input[name="theme"]').value;
+
+      Swal.fire({
+        title: 'Attivare tema?',
+        text: `Vuoi attivare il tema "${theme}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sì',
+        cancelButtonText: 'Annulla'
+      }).then(result => {
+        if (result.isConfirmed) {
+          this.submit();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

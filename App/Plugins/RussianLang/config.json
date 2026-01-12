@@ -2,5 +2,6 @@
     "name": "Translate Example",
     "author": "Marco Dattisi",
     "active": true,
-    "description": "Example translation"
+    "description": "Example translation",
+    "version":"1.0.0"
 }

@@ -118,7 +118,10 @@ class TwigService
           : []
       );
     }
-
+    $twig->addFunction(new \Twig\TwigFunction(
+      'page_title',
+      fn() => \Core\View\Page::getTitle()
+    ));
     $twig->addFunction(new \Twig\TwigFunction('__', function (string $key, array $params = []) {
       return \Core\Lang::get($key, $params);
     }));

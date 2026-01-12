@@ -42,6 +42,7 @@ class Config
   public static bool $DEBUG_CONSOLE = false;
   public static string $Logo_App = "";
   public static string $SALT = "";
+  public static string $systemDir;
   public static string $link_footer = "https://marcodattisi.it";
   public static string $label_link = "Marco Dattisi";
   public static string $design_footer = "Developing by";

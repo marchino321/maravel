@@ -324,6 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	// --- Inizializza date/time picker ---
 	initDynamicPickers();
 	percentualeClass();
+  
 });
 
 

@@ -50,7 +50,10 @@ $myFilesDir = realpath($baseDir . '/MyFiles');
 if (!$coreDir || !$myFilesDir) {
   exit("❌ Directory Core o MyFiles non trovata\n");
 }
-
+/* ======================================================
+ * 🧹 CLEAN MyFiles (ANTI FILE VECCHI)
+ * ====================================================== */
+cleanMyFiles($myFilesDir);
 /* ======================================================
  * ❌ POLICY DI ESCLUSIONE (CORE-SAFE)
  * ====================================================== */
@@ -62,6 +65,7 @@ $DISALLOWED_FILES = [
   'Core/Classi/Menu.php',
   'Core/Classi/MenuManager.php',
   'ConfigFiles/config.local.json',
+  
 ];
 
 /**
@@ -70,9 +74,9 @@ $DISALLOWED_FILES = [
 $DISALLOWED_DIRS = [
   'Core/cache',
   'App/Theme',
-  'App/Plugins/Custom',
   'App/Controllers',
-  'App/Models'
+  'App/Models',
+  '_system'
 ];
 
 /* ======================================================
@@ -107,6 +111,21 @@ function addFile(
     'sha256' => hash_file('sha256', $absolutePath)
   ];
 }
+
+/**
+ * 🧹 Pulisce MyFiles da vecchi file .txt
+ */
+function cleanMyFiles(string $myFilesDir): void
+{
+  if (!is_dir($myFilesDir)) {
+    return;
+  }
+
+  foreach (glob($myFilesDir . DIRECTORY_SEPARATOR . '*.txt') as $file) {
+    @unlink($file);
+  }
+}
+
 
 /* ======================================================
  * 📂 SCANSIONE RICORSIVA CON ESCLUSIONI

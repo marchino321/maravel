@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block Body %}
+
+
+<div class="row">
+  {% for p in plugins %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-1">{{ p.label }}</h5>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input plugin-toggle" type="checkbox" data-plugin="{{ p.name }}" {% if p.active
+              %}checked{% endif %}>
+          </div>
+        </div>
+
+        <small class="text-muted">
+          Versione <span class="text-info"><u>{{ p.version }}</u></span>
+        </small>
+
+        {% if p.description %}
+        <p class="mt-2 mb-0 text-muted small">
+          {{ p.description }}
+        </p>
+        {% endif %}
+
+        <div class="mt-2">
+          {% if p.active %}
+          <span class="text-success"><u>Attivo</u></span>
+          {% else %}
+          <span class="text-secondary"><u>Disattivato</u></span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p>Nessun plugin installato.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block Script %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementsByClassName('page-title-main').innerHTML = "{{ Titolo ?? '' }}";
+    document.querySelectorAll('.plugin-toggle').forEach(toggle => {
+
+      toggle.addEventListener('change', function () {
+
+        const plugin = this.dataset.plugin;
+        const active = this.checked ? 1 : 0;
+        const checkbox = this;
+
+        Swal.fire({
+          title: active ? 'Attivare plugin?' : 'Disattivare plugin?',
+          text: `Vuoi davvero ${active ? 'attivare' : 'disattivare'} il plugin "${plugin}"?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sì',
+          cancelButtonText: 'Annulla'
+        }).then(result => {
+
+          if (!result.isConfirmed) {
+            checkbox.checked = !checkbox.checked;
+            return;
+          }
+
+          AjaxHelper.post(
+            '/private/super-admin/toggle-plugin-ajax',
+            {
+              plugin: plugin,
+              active: active
+            },
+            function (res) {
+
+              if (!res || res.status !== 'ok') {
+                Swal.fire(
+                  'Errore',
+                  res?.error ?? 'Errore durante l’operazione',
+                  'error'
+                );
+                checkbox.checked = !checkbox.checked;
+                return;
+              }
+
+              Swal.fire(
+                'OK',
+                'Operazione completata',
+                'success'
+              ).then(() => {
+                if (res.reload) {
+                  location.reload();
+                }
+              });
+            },
+            function () {
+              Swal.fire(
+                'Errore',
+                'Errore di comunicazione con il server',
+                'error'
+              );
+              checkbox.checked = !checkbox.checked;
+            }
+          );
+
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}
