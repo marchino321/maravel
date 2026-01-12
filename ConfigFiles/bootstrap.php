@@ -7,7 +7,7 @@ use App\Debug;
 use Core\Error;
 use Core\View\ThemeManager;
 use Core\View\TwigManager;
-
+use Core\Security\SecurityDetector;
 // -------------------------
 // Impostazioni di sistema
 // -------------------------
@@ -19,6 +19,16 @@ date_default_timezone_set('Europe/Rome');
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+
+
+
+foreach ($_REQUEST as $key => $value) {
+  if (is_string($value)) {
+    SecurityDetector::analyze($value, "REQUEST:$key");
+  }
+}
+
 
 // Autoload Composer caricato da index.php
 //require_once __DIR__ . '/../vendor/autoload.php';

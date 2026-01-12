@@ -10,7 +10,8 @@ use Core\View\MenuManager;
 use Core\Components\DynamicTable;
 use Core\Helpers\FormHelper;
 use App\Config;
-use Core\Helpers\WooCommerceClient;
+
+use Core\View\Page;
 
 if (!defined("CLI_MODE")) {
   defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
@@ -24,7 +25,8 @@ class Dashboard extends Controller
   {
 
     Flash::AddByKey('insert.ok');
-    $ritorno['Titolo'] = "Dashboard";
+    Page::setTitle('Dashboard');
+    $ritorno =  [];
     echo $this->twigManager->getTwig()->render('Private/Dashboard/index.html', $ritorno);
   }
 }

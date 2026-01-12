@@ -13,6 +13,7 @@ use App\Models\ModelCollaboratori;
 use Core\Classi\Flash;
 use Core\Classi\GetHeaders;
 use Core\Helpers\UploadHelper;
+use Core\View\Page;
 
 if (!defined("CLI_MODE")) {
     defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
@@ -24,8 +25,7 @@ class Collaboratori extends Controller
    
     function ElencoCollaboratori(...$params)
     {
-        
-        $ritorno['Titolo'] = "Elenco Collaboratori";
+        Page::setTitle('Elenco Collaboratori');
         $ritorno['Elenco'] = ModelCollaboratori::GetAllCollaboratori();
         $ritorno['Link'] = "/private/collaboratori/aggiungi-modifica-collaboratore";
         $ritorno['Label'] = "Aggiungi Collaboratore";
@@ -33,14 +33,16 @@ class Collaboratori extends Controller
     }
     function AggiungiModificaCollaboratore(...$params)
     {
-        $ritorno['Titolo'] = "Aggiungi Collaboratore";
+        //$ritorno['Titolo'] = "Aggiungi Collaboratore";
+        Page::setTitle('Aggiungi Collaboratore');
         $ritorno['Form'] = "/private/Collaboratori/SalvaCollaboratore";
         $passwordlUtente = randomPassword(16);
         $collaboratoreData = [];
         if(isset($params[1])){
 
             $collaboratoreData = ModelCollaboratori::GetCollaboratoreByID($params[1]);
-            $ritorno['Titolo'] = "Modifica Collaboratore - " . $collaboratoreData['nomeUtente'] . " " . $collaboratoreData['cognomeUtente'];
+            
+            Page::setTitle("Modifica Collaboratore - " . $collaboratoreData['nomeUtente'] . " " . $collaboratoreData['cognomeUtente']);
             $passwordlUtente = "";
             $ritorno['Form'] .= "/" . $params[1];
             $ritorno['avatar'] = $collaboratoreData['avatar_utente'];

@@ -16,15 +16,17 @@ final class ThemeManager
     'footer.after'  => [],
   ];
   private static array $assets = [
-    'css' => [],
-    'js_head' => [],
+    'css'       => [],
+    'js_head'   => [],
     'js_footer' => [],
-    'js_inline' => [],
+    'inline_css' => [],   // 👈
+    'inline_js' => [],   // 👈
   ];
   private static array $registered = [];
   private static array $once = [];
   public static string $theme;
   public static string $basePath;
+  protected static array $inlineCss = [];
   private static ?\Twig\Environment $twig = null;
 
   public static function boot(): void
@@ -45,47 +47,65 @@ final class ThemeManager
     self::addOnce('footer.after', [self::class, 'renderFooterAssets']);
   }
 
+  public static function renderInlineCss(): string
+  {
+    if (empty(self::$inlineCss)) {
+      return '';
+    }
+
+    $out = "<style id=\"theme-inline-css\">\n";
+
+    foreach (self::$inlineCss as $css) {
+      $out .= $css . "\n";
+    }
+
+    $out .= "</style>\n";
+
+    return $out;
+  }
   private static function renderHeadAssets(): string
   {
     $out = '';
 
     foreach (self::resolve(self::$assets['css']) as $asset) {
-      $out .= sprintf(
-        '<link rel="stylesheet" href="%s" id="%s">%s',
-        $asset['url'],
-        $asset['id'],
-        PHP_EOL
-      );
+      $out .= sprintf('<link rel="stylesheet" href="%s" id="%s">%s', $asset['url'], $asset['id'], PHP_EOL);
     }
 
+    // ✅ inline css
+    $out .= self::renderInlineCss();
+
     foreach (self::resolve(self::$assets['js_head']) as $asset) {
-      $out .= sprintf(
-        '<script src="%s" id="%s"></script>%s',
-        $asset['url'],
-        $asset['id'],
-        PHP_EOL
-      );
+      $out .= sprintf('<script src="%s" id="%s"></script>%s', $asset['url'], $asset['id'], PHP_EOL);
     }
 
     return $out;
   }
+  private static function renderInlineJs(): string
+  {
+    if (empty(self::$assets['inline_js'])) {
+      return '';
+    }
 
+    $out = '';
+
+    foreach (self::$assets['inline_js'] as $id => $asset) {
+      $out .= "<script id=\"" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "\">\n";
+      $out .= $asset['code'] . "\n";
+      $out .= "</script>\n";
+    }
+
+    return $out;
+  }
   private static function renderFooterAssets(): string
   {
     $out = '';
 
     foreach (self::resolve(self::$assets['js_footer']) as $asset) {
-      $out .= sprintf(
-        '<script src="%s" id="%s"></script>%s',
-        $asset['url'],
-        $asset['id'],
-        PHP_EOL
-      );
+      $out .= '<script src="' . $asset['url'] . '" id="' . $asset['id'] . '"></script>' . "\n";
     }
 
-    foreach (self::resolve(self::$assets['js_inline']) as $asset) {
-      $out .= '<script>' . $asset['code'] . '</script>' . PHP_EOL;
-    }
+    // 🔥 QUESTO MANCAVA
+    $out .= self::renderInlineJs();
 
     return $out;
   }
@@ -179,15 +199,25 @@ final class ThemeManager
   }
 
   public static function addInlineJs(
-    string $code,
     string $id,
+    string $code,
     array $deps = []
   ): void {
-    self::$assets['js_inline'][$id] = [
+    self::$assets['inline_js'][$id] = [
       'id'   => $id,
-      'code' => $code,
+      'code' => trim($code),
       'deps' => $deps,
     ];
+  }
+  public static function addInlineCss(?string $id, string $css): void
+  {
+    $key = $id ?? md5($css);
+
+    if (isset(self::$inlineCss[$key])) {
+      return;
+    }
+
+    self::$inlineCss[$key] = trim($css);
   }
   private static function resolve(array $assets): array
   {

@@ -1,21 +1,23 @@
 {% extends 'layout.html' %}
 {% block title %} Profilo - {{sessione.nomeUtente}} {{sessione.cognomeUtente}} {% endblock %}
 {% block css %}
-<link href="/App/public/assets/libs/dropzone/min/dropzone.min.css" rel="stylesheet" type="text/css" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.css" rel="stylesheet" type="text/css" />
+
 {% endblock %}
 {% block Body %}
 {{'inizio' | startForm('/private/Profilo/SalvaAggiornaProfilo') | raw }}
-  <div class="row">
-    <div class="col-md-4">
-      <div class="col-md-12">
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="col-md-12">
       <div class="card ombra">
         <div class="card-body">
-          <input type="file" name="foto_profilo" data-plugins="dropify" class="dropify" data-default-file="{{sessione.avatar_utente}}" data-allowed-file-extensions='["png", "jpg", "jpeg", "gif"]' data-max-file-size="3M"/>
+          {{ Quill | raw }}
+          {{ ProfiloUpload | raw }}
           <div class="col-md-12">
             <div class="row mb-3 mt-2">
               <label class="col-6 col-form-label">Permesso</label>
-              <label class="col-6 col-form-label"><span class="badge bg-success">{{sessione.descrizionePermesso}}</span></label>
+              <label class="col-6 col-form-label"><span
+                  class="badge bg-success">{{sessione.descrizionePermesso}}</span></label>
             </div>
             <div class="row mb-3 mt-2">
               <label class="col-6 col-form-label">Registrazione</label>
@@ -32,158 +34,154 @@
           </div>
         </div>
       </div>
-      </div>
-      <div class="col-md-12">
-        <div class="card ombra">
-          <div class="card-body">
-            <h3 class="mb-3 header-title text-center">Setting Utente</h3>
-            <div class="col-md-12 form-group">
-              <h4 class="mb-3 header-title">Barra Laterale</h4>
-              <div class="form-check form-switch mb-1">
-                  <input type="radio" class="form-check-input" name="leftsidebar-color" value="light" id="light-check">
-                  <label class="form-check-label" for="light-check">Chiaro</label>
-              </div>
-              <div class="form-check form-switch mb-1">
-                  <input type="radio" class="form-check-input" name="leftsidebar-color" value="dark" id="dark-check" checked="">
-                  <label class="form-check-label" for="dark-check">Scuro</label>
-              </div>
-              <div class="form-check form-switch mb-1">
-                  <input type="radio" class="form-check-input" name="leftsidebar-color" value="brand" id="brand-check">
-                  <label class="form-check-label" for="brand-check">Blu</label>
-              </div>
-              <div class="form-check form-switch mb-3">
-                  <input type="radio" class="form-check-input" name="leftsidebar-color" value="gradient" id="gradient-check">
-                  <label class="form-check-label" for="gradient-check">Sfumato</label>
-              </div>
+    </div>
+    <div class="col-md-12">
+      <div class="card ombra">
+        <div class="card-body">
+          <h3 class="mb-3 header-title text-center">Setting Utente</h3>
+          <div class="col-md-12 form-group">
+            <h4 class="mb-3 header-title">Barra Laterale</h4>
+            <div class="form-check form-switch mb-1">
+              <input type="radio" class="form-check-input" name="leftsidebar-color" value="light" id="light-check">
+              <label class="form-check-label" for="light-check">Chiaro</label>
             </div>
-            <div class="col-md-12">
-              <h4 class="mb-3 header-title">Barra Alta</h4>
-              <div class="form-check form-switch mb-1">
-                  <input type="radio" class="form-check-input" name="topbar-color" value="dark" id="darktopbar-check" checked="">
-                  <label class="form-check-label" for="darktopbar-check">Scuro</label>
-              </div>
-              <div class="form-check form-switch mb-1">
-                  <input type="radio" class="form-check-input" name="topbar-color" value="light" id="lighttopbar-check">
-                  <label class="form-check-label" for="lighttopbar-check">Chiaro</label>
-              </div>
+            <div class="form-check form-switch mb-1">
+              <input type="radio" class="form-check-input" name="leftsidebar-color" value="dark" id="dark-check"
+                checked="">
+              <label class="form-check-label" for="dark-check">Scuro</label>
             </div>
-            <div class="justify-content-end row">
-                <div class="col-8 col-xl-9">
-                  <button type="submit" class="btn btn-info waves-effect waves-light">
-                    <span class="btn-label"><i class="fas fa-save"></i></span>Salva
-                  </button>
-                </div>
+            <div class="form-check form-switch mb-1">
+              <input type="radio" class="form-check-input" name="leftsidebar-color" value="brand" id="brand-check">
+              <label class="form-check-label" for="brand-check">Blu</label>
             </div>
-            <div class="col-md-12 mt-2">
-              <p class="text-end"><span class="text-danger">*</span> Perchè i parametri scelti rimangano in memoria devi salvare</p>
+            <div class="form-check form-switch mb-3">
+              <input type="radio" class="form-check-input" name="leftsidebar-color" value="gradient"
+                id="gradient-check">
+              <label class="form-check-label" for="gradient-check">Sfumato</label>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-8">
-      <div class="col-md-12">
-      <div class="card ombra">
-          <div class="card-body">
-              <h4 class="mb-3 header-title">Informazioni Richieste</h4>
-                  <div class="row mb-3">
-                      <label for="nomeUtente" class="col-4 col-xl-3 col-form-label">Nome Utente <span class="text-danger">*</span></label>
-                      <div class="col-8 col-xl-9">
-                          <input type="text" name="nomeUtente" class="form-control" id="nomeUtente" placeholder="Nome utente" required value="{{sessione.nomeUtente}}">
-                          <div class="invalid-feedback">
-                            Campo obbligatorio
-                          </div>
-                      </div>
-                  </div>
-                  <div class="row mb-3">
-                      <label for="cognomeUtente" class="col-4 col-xl-3 col-form-label">Cognome Utente <span class="text-danger">*</span></label>
-                      <div class="col-8 col-xl-9">
-                          <input type="text" name="cognomeUtente" class="form-control" id="cognomeUtente" placeholder="Cognome utente" required value="{{sessione.cognomeUtente}}">
-                          <div class="invalid-feedback">
-                            Campo obbligatorio
-                          </div>
-                      </div>
-                  </div>
-                  <div class="row mb-3">
-                      <label for="emailUtente" class="col-4 col-xl-3 col-form-label">Email Utente <span class="text-danger">*</span></label>
-                      <div class="col-8 col-xl-9">
-                          <input type="email" name="emailUtente" class="form-control" id="emailUtente" placeholder="inserisci la email" required value="{{sessione.emailUtente}}">
-                          <div class="invalid-feedback">
-                            Campo obbligatorio, oppure metti un'email valida
-                          </div>
-                      </div>
-                  </div>
-                  <div class="row mb-3">
-                      <label for="cellulareRecapitoUtente" class="col-4 col-xl-3 col-form-label">Cellulare Utente </label>
-                      <div class="col-8 col-xl-9">
-                          <input type="text" name="cellulareRecapitoUtente" class="form-control" id="cellulareRecapitoUtente" placeholder="inserisci il tuo numero di cellulare" value="{{sessione.cellulareRecapitoUtente}}">
-                          <div class="invalid-feedback">
-                            Campo obbligatorio
-                          </div>
-                      </div>
-                  </div>
-                  <div class="row mb-3">
-                      <label for="passwordUtente" class="col-4 col-xl-3 col-form-label">Password</label>
-                      <div class="col-8 col-xl-9">
-                          <input type="text" name="passwordUtente" class="form-control" id="passwordUtente" placeholder="Lasciare vuota per non cambiare">
-                          <div class="invalid-feedback">
-                            Campo obbligatorio
-                          </div>
-                      </div>
-                  </div>
-                  <div class="justify-content-end row">
-                      <div class="col-8 col-xl-9">
-                        <button type="submit" class="btn btn-success waves-effect waves-light">
-                          <span class="btn-label"><i class="fas fa-save"></i></span>Salva
-                        </button>
-                      </div>
-                  </div>
-
-
-              <div class="col-md-12 mt-2">
-                <p class="text-end"><span class="text-danger">*</span> Campi obbligatori, non possono essere lasciati in bianco</p>
-              </div>
-          </div>  <!-- end card-body -->
-      </div>  <!-- end card -->
-    </div>
-      <div class="col-md-12">
-        <div class="card ombra">
-          <div class="card-body">
-              <h4 class="mb-3 header-title">Da decidere</h4>
+          <div class="col-md-12">
+            <h4 class="mb-3 header-title">Barra Alta</h4>
+            <div class="form-check form-switch mb-1">
+              <input type="radio" class="form-check-input" name="topbar-color" value="dark" id="darktopbar-check"
+                checked="">
+              <label class="form-check-label" for="darktopbar-check">Scuro</label>
+            </div>
+            <div class="form-check form-switch mb-1">
+              <input type="radio" class="form-check-input" name="topbar-color" value="light" id="lighttopbar-check">
+              <label class="form-check-label" for="lighttopbar-check">Chiaro</label>
+            </div>
+          </div>
+          <div class="justify-content-end row">
+            <div class="col-8 col-xl-9">
+              <button type="submit" class="btn btn-info waves-effect waves-light">
+                <span class="btn-label"><i class="fas fa-save"></i></span>Salva
+              </button>
+            </div>
+          </div>
+          <div class="col-md-12 mt-2">
+            <p class="text-end"><span class="text-danger">*</span> Perchè i parametri scelti rimangano in memoria devi
+              salvare</p>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="col-md-8">
+    <div class="col-md-12">
+      <div class="card ombra">
+        <div class="card-body">
+          <h4 class="mb-3 header-title">Informazioni Richieste</h4>
+          <div class="row mb-3">
+            <label for="nomeUtente" class="col-4 col-xl-3 col-form-label">Nome Utente <span
+                class="text-danger">*</span></label>
+            <div class="col-8 col-xl-9">
+              <input type="text" name="nomeUtente" class="form-control" id="nomeUtente" placeholder="Nome utente"
+                required value="{{sessione.nomeUtente}}">
+              <div class="invalid-feedback">
+                Campo obbligatorio
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="cognomeUtente" class="col-4 col-xl-3 col-form-label">Cognome Utente <span
+                class="text-danger">*</span></label>
+            <div class="col-8 col-xl-9">
+              <input type="text" name="cognomeUtente" class="form-control" id="cognomeUtente"
+                placeholder="Cognome utente" required value="{{sessione.cognomeUtente}}">
+              <div class="invalid-feedback">
+                Campo obbligatorio
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="emailUtente" class="col-4 col-xl-3 col-form-label">Email Utente <span
+                class="text-danger">*</span></label>
+            <div class="col-8 col-xl-9">
+              <input type="email" name="emailUtente" class="form-control" id="emailUtente"
+                placeholder="inserisci la email" required value="{{sessione.emailUtente}}">
+              <div class="invalid-feedback">
+                Campo obbligatorio, oppure metti un'email valida
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="cellulareRecapitoUtente" class="col-4 col-xl-3 col-form-label">Cellulare Utente </label>
+            <div class="col-8 col-xl-9">
+              <input type="text" name="cellulareRecapitoUtente" class="form-control" id="cellulareRecapitoUtente"
+                placeholder="inserisci il tuo numero di cellulare" value="{{sessione.cellulareRecapitoUtente}}">
+              <div class="invalid-feedback">
+                Campo obbligatorio
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="passwordUtente" class="col-4 col-xl-3 col-form-label">Password</label>
+            <div class="col-8 col-xl-9">
+              <input type="text" name="passwordUtente" class="form-control" id="passwordUtente"
+                placeholder="Lasciare vuota per non cambiare">
+              <div class="invalid-feedback">
+                Campo obbligatorio
+              </div>
+            </div>
+          </div>
+          <div class="justify-content-end row">
+            <div class="col-8 col-xl-9">
+              <button type="submit" class="btn btn-success waves-effect waves-light">
+                <span class="btn-label"><i class="fas fa-save"></i></span>Salva
+              </button>
+            </div>
+          </div>
 
-        {{'fine' | startForm | raw }}
-	{% endblock %}
 
-	{% block Script %}
-  <script src="/App/public/assets/libs/dropzone/min/dropzone.min.js"></script>
-  <script src="https://cdn.tutorialjinni.com/Dropify/0.2.2/js/dropify.min.js"></script>
+          <div class="col-md-12 mt-2">
+            <p class="text-end"><span class="text-danger">*</span> Campi obbligatori, non possono essere lasciati in
+              bianco</p>
+          </div>
+        </div> <!-- end card-body -->
+      </div> <!-- end card -->
+    </div>
+    <div class="col-md-12">
+      <div class="card ombra">
+        <div class="card-body">
+          <h4 class="mb-3 header-title">Da decidere</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-	<script type="text/javascript">
+{{'fine' | startForm | raw }}
+{% endblock %}
 
-		$(document).ready(() => {
-			//Tabella con input ricerca e salvataggio ricerca
-			//CaricaTabella("elencoContatti");
-			//TableInput("elencoContatti", "/");
-		});
-    $(".dropify").dropify({
-    messages: {
-      default: "Trascina e rilascia la tua foto qui",
-      replace: "Se trascini e rilasci adesso la foto verrà sostituita",
-      remove: "Elimina",
-      error: "Ooops, Qualcosa è andato storto."
-    },
-    error: {
-      fileSize: "Il file è più grande di (1M max)."
-    },
-});
+{% block Script %}
 
 
+<script type="text/javascript">
 
-	</script>
 
-	{% endblock %}
+
+
+</script>
+
+{% endblock %}

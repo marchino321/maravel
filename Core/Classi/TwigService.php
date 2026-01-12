@@ -125,31 +125,7 @@ class TwigService
     $twig->addFunction(new \Twig\TwigFunction('__', function (string $key, array $params = []) {
       return \Core\Lang::get($key, $params);
     }));
-    $twig->addFunction(new \Twig\TwigFunction('render_assets', function () {
-      $html = '';
 
-      // CSS esterni
-      foreach (AssetHelper::getCss() as $css) {
-        $html .= '<link rel="stylesheet" href="' . $css['url'] . '" id="' . $css['id'] . '">' . "\n";
-      }
-
-      // CSS inline
-      foreach (AssetHelper::getInlineCss() as $css) {
-        $html .= '<style>' . $css . '</style>' . "\n";
-      }
-
-      // JS esterni
-      foreach (AssetHelper::getJs() as $js) {
-        $html .= '<script src="' . $js['file'] . '" id="' . $js['id'] . '"></script>' . "\n";
-      }
-
-      // JS inline
-      foreach (AssetHelper::getInlineJs() as $js) {
-        $html .= '<script>' . $js . '</script>' . "\n";
-      }
-
-      return $html;
-    }));
 
     // -------------------------
     // Globali

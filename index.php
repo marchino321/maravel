@@ -22,11 +22,6 @@ use Core\View\ThemeManager;
 // -------------------------
 // Config e bootstrap
 // -------------------------
-Config::$systemDir = $_SERVER['DOCUMENT_ROOT'] . '/_system';
-
-if (!is_dir(Config::$systemDir)) {
-  mkdir(Config::$systemDir, 0755, true);
-}
 
 $configFile = __DIR__ . '/ConfigFiles/config.local.json';
 
