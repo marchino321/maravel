@@ -122,14 +122,14 @@ class MenuManager
       $id = $item['id'] ?? null;
       if (!$id) continue;
 
-      $this->setMenuItem(
+      $this->addMenuItem( // ✅ NON setMenuItem
         $id,
         $item['label'] ?? 'Unnamed',
         $item['url'] ?? '#',
         $item['roles'] ?? [],
         $item['order'] ?? 50,
         $item['parent'] ?? null,
-        $item['icon'] ?? null // Supporto icona
+        $item['icon'] ?? null
       );
     }
 

@@ -16,6 +16,7 @@ class Config
     'private' => ['App\\Controllers\\Private\\', 'private'],
     'ajax'    => ['App\\Controllers\\Ajax\\', 'ajax'],
     'front'   => ['App\\Controllers\\', 'front'],
+    'admin'   => ['App\\Controllers\\Admin\\', 'admin'],
   ];
   public static array $dbConfig = [];      // Config database
   public static array $hooks = [];         // Hook dinamici

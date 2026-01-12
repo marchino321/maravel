@@ -54,9 +54,17 @@ $menuManager = null;
 // -------------------------
 if (!$isApi) {
   $userRoles = Auth::check() ? [Auth::role()] : [];
+  if (!MenuManager::getInstance()) {
 
-  $menuManager = new MenuManager($userRoles, []);
-  MenuManager::setInstance($menuManager);
+
+
+    $menuManager = new MenuManager($userRoles, []);
+    MenuManager::setInstance($menuManager);
+  } else {
+    $menuManager = MenuManager::getInstance();
+  }
+
+
 
   $menu        = new Menu($menuManager);
   $menu->menuAdmin(); // per admin
@@ -92,8 +100,8 @@ if (!$isApi) {
   // 🔌 QUI i plugin registrano lingue, path, menu, ecc.
   $pluginManager->registerRoutes($router, $twigManager, $menuManager);
 
-  $headerPlugin = new \App\Plugins\HeaderMenu\HeaderMenu();
-  $twig->addGlobal('headerMenu', $headerPlugin->getMenu());
+  // $headerPlugin = new \App\Plugins\HeaderMenu\HeaderMenu();
+  // $twig->addGlobal('headerMenu', $headerPlugin->getMenu());
   $twigManager->addGlobal('menu', $menuManager->renderForTwig());
 }
 

@@ -1,29 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Plugins\HeaderMenu;
 
 use Core\PluginController;
 use App\Debug;
 use Core\Auth;
-use Core\View\ThemeManager;
 use Core\Router;
 use Core\View\TwigManager;
 use Core\View\MenuManager;
+use Core\View\ThemeManager;
 
+/**
+ * Plugin HeaderMenu
+ *
+ * RESPONSABILITÀ:
+ * - Gestisce SOLO il menu NAVBAR (header)
+ * - NON interagisce con MenuManager (sidebar)
+ * - Espone il menu a Twig come variabile globale: headerMenu
+ * - Viene istanziato UNA SOLA VOLTA (singleton plugin)
+ */
 class HeaderMenu extends PluginController
 {
+  /** Istanza unica del plugin */
+  private static ?self $instance = null;
+
+  /** Manager menu header */
   private HeaderMenuManager $headerMenu;
-  private TwigManager $twigManager;
+
+  /**
+   * Costruttore
+   * ⚠️ NON va mai chiamato manualmente
+   */
   public function __construct()
   {
+    // 🔒 Blocco istanziazioni multiple
+    if (self::$instance !== null) {
+      Debug::log('⚠️ HeaderMenu già istanziato, skip costruttore', 'HEADER-MENU');
+      return;
+    }
+
+    self::$instance = $this;
+
     parent::__construct();
 
-    // ruoli utente da sessione
+    // 🔐 Ruoli utente
     $userRoles = $_SESSION['ruoli'] ?? [];
     if (Auth::checkSuperAdmin()) {
       $userRoles = ['SuperAdmin'];
     }
 
+    // 🧭 Definizione menu HEADER (navbar)
     $this->headerMenu = new HeaderMenuManager($userRoles, [
 
       [
@@ -71,7 +99,6 @@ class HeaderMenu extends PluginController
         "icon"  => "fas fa-cloud-download-alt"
       ],
 
-      // 🔌 GESTIONE PLUGIN
       [
         "id"    => "plugins",
         "label" => "",
@@ -81,7 +108,6 @@ class HeaderMenu extends PluginController
         "icon"  => "fas fa-plug"
       ],
 
-      // 🎨 GESTIONE THEME
       [
         "id"    => "themes",
         "label" => "",
@@ -102,15 +128,41 @@ class HeaderMenu extends PluginController
 
     ]);
 
-    Debug::log("🔌 Plugin HeaderMenu caricato", "HEADER-MENU");
+    Debug::log('✅ Plugin HeaderMenu inizializzato correttamente', 'HEADER-MENU');
   }
-  public function register(Router $router, TwigManager $twigManager, ?MenuManager $menuManager = null): void
+
+  /**
+   * Accesso singleton
+   */
+  public static function getInstance(): ?self
   {
-    ThemeManager::addOnce('body.after', '<div id="toast-root"></div>');
+    return self::$instance;
   }
+
+  /**
+   * Registrazione plugin
+   * Qui avviene l’esposizione a Twig
+   */
+  public function register(
+    Router $router,
+    TwigManager $twigManager,
+    ?MenuManager $menuManager = null
+  ): void {
+
+    // 🧩 Espone il menu HEADER a Twig
+    $twigManager->addGlobal('headerMenu', $this->getMenu());
+
+    // 🧱 Placeholder UI globale (una sola volta)
+    ThemeManager::addOnce('body.after', '<div id="toast-root"></div>');
+
+    Debug::log('🧩 HeaderMenu registrato e globale Twig aggiunta', 'HEADER-MENU');
+  }
+
+  /**
+   * Menu pronto per Twig
+   */
   public function getMenu(): array
   {
-
     return $this->headerMenu->renderForTwig();
   }
 }
