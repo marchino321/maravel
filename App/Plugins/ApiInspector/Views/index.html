@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block Body %}
+<div class="card">
+  <div class="card-body">
+
+    <h4 class="mb-4">🔍 API Inspector</h4>
+
+    <table class="table table-bordered table-hover" id="api-table">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Controller</th>
+          <th>Metodo</th>
+          <th>HTTP</th>
+          <th>URI</th>
+          <th>Azione</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for api in apis %}
+        <tr data-uri="{{ api.uri }}" data-http="{{ api.http }}">
+          <td>{{ api.version }}</td>
+          <td>{{ api.controller }}</td>
+          <td>{{ api.method }}</td>
+          <td>
+            <span class="badge bg-{{ api.http == 'GET' ? 'success' : 'primary' }}">
+              {{ api.http }}
+            </span>
+          </td>
+          <td><code>{{ api.uri }}</code></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary btn-run-api">
+              ▶ Esegui
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- RESPONSE PANEL -->
+<div class="card mt-4 d-none" id="api-response-card">
+  <div class="card-body">
+    <h5 class="mb-3">📤 Risposta API</h5>
+    <pre class="text-info p-3 rounded" id="api-response" style="max-height:400px; overflow:auto;"></pre>
+  </div>
+</div>
+{% endblock %}
+
+{% block Script %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    document.querySelectorAll('.btn-run-api').forEach(btn => {
+      btn.addEventListener('click', () => {
+
+        const row = btn.closest('tr');
+        const uri = row.dataset.uri;
+        const method = row.dataset.http;
+
+        const responseBox = document.getElementById('api-response');
+        const card = document.getElementById('api-response-card');
+
+        responseBox.textContent = '⏳ Esecuzione in corso...';
+        card.classList.remove('d-none');
+
+        AjaxHelper.post(
+          '/api-inspector/execute',
+          {
+            uri: uri,
+            method: method
+          }
+        ).then(res => {
+          console.log(res);
+          responseBox.textContent =
+            JSON.stringify(res, null, 2);
+        }).catch(err => {
+          responseBox.textContent =
+            '❌ Errore\n\n' + JSON.stringify(err, null, 2);
+        });
+
+      });
+    });
+
+  });
+</script>
+{% endblock %}

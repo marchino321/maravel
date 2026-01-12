@@ -31,7 +31,9 @@ class Config
   // Percorsi e debug (di default, possono essere sovrascritti dal JSON)
   // -------------------------------
   public static string $baseDir   = __DIR__ . "/../";
+  public static string $tmpDir   = __DIR__ . "/../tempDir";
   public static string $pluginDir = __DIR__ . '/Plugins';
+  public static string $themeDir  = __DIR__ . '/../App/Theme';
   public static string $viewsDir  = __DIR__ . '/Views';
   public static string $assetsDir = '/public';
   public static string $logDir    = __DIR__ . '/../logs';

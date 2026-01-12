@@ -2,5 +2,6 @@
   "name": "Crystal Light Theme",
   "version": "1.0.0",
   "description": "Tema dashboard light mode con accenti blu/cristallo",
-  "author": "Marco Dattisi"
+  "author": "Marco Dattisi",
+  "min_core": "0.9.0"
 }

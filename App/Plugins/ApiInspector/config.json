@@ -1,0 +1,12 @@
+{
+  "name": "ApiInspector",
+  "label": "API Inspector",
+  "version": "1.0.0",
+  "description": "Analizzatore e visualizzatore API del framework",
+  "author": "Marco Dattisi",
+  "namespace": "App\\Plugins\\ApiInspector",
+  "main": "ApiInspector.php",
+  "class": "ApiInspector",
+  "active": false,
+  "min_core": "1.0.0"
+}

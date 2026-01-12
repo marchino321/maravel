@@ -2,5 +2,6 @@
   "name": "Defualt Theme",
   "version": "1.0.0",
   "description": "Tema dashboard di default dark style",
-  "author": "Marco Dattisi"
+  "author": "Marco Dattisi",
+  "min_core": "0.9.0"
 }

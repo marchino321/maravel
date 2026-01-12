@@ -35,6 +35,8 @@ class Router
   private ?TwigManager $twigManager;
   private ?MenuManager $menuManager;
 
+  private static array $apiRegistry = [];
+
   public function __construct(?TwigManager $twigManager = null, ?MenuManager $menuManager = null)
   {
     $this->twigManager = $twigManager;
@@ -59,7 +61,20 @@ class Router
   {
     return lcfirst($this->convertToStudlyCaps($string));
   }
+  public static function registerApi(array $api): void
+  {
+    self::$apiRegistry[] = array_merge([
+      'method'     => 'GET',
+      'auth'       => false,
+      'roles'      => [],
+      'source'     => 'core',
+    ], $api);
+  }
 
+  public static function getApiRegistry(): array
+  {
+    return self::$apiRegistry;
+  }
   public function add(string $pattern, callable $callback, string $namespace = 'App\\Controllers'): void
   {
     $this->routes[$pattern] = [
@@ -106,7 +121,16 @@ class Router
         $controllerName  = $this->convertToStudlyCaps($parts[0] ?? 'Test');
         $method          = $this->convertToCamelCase($parts[1] ?? 'index');
         $params          = array_slice($parts, 2);
-
+        Router::registerApi([
+          'method'     => $_SERVER['REQUEST_METHOD'],
+          'uri'        => '/api/v' . $version . '/' . ($parts[0] ?? ''),
+          'version'    => $version,
+          'controller' => $controllerName,
+          'action'     => $method,
+          'auth'       => true, // se in futuro hai middleware
+          'roles'      => [],
+          'source'     => 'core'
+        ]);
         if ($version === 1) {
           // namespace per v1 (compatibilità)
           $controllerClass = "App\\Controllers\\Api\\{$controllerName}";
@@ -148,22 +172,29 @@ class Router
       // ==============================
       // Plugin routes
       // ==============================
+
+
+      uksort($this->pluginRoutes, fn($a, $b) => strlen($b) <=> strlen($a));
+
       foreach ($this->pluginRoutes as $pattern => $callback) {
+
         $regex = preg_replace('#\{(\w+)\}#', '([^/]+)', $pattern);
-        $regex = "#^$regex(?:/(.*))?$#";
+        $regex = "#^$regex$#";
 
         if (preg_match($regex, $uri, $matches)) {
-          array_shift($matches);
-          $params = [];
-          foreach ($matches as $m) {
-            if ($m !== '' && $m !== null) {
-              $params = array_merge($params, explode('/', $m));
-            }
-          }
-          Debug::log("🔌 Route plugin match: {$pattern} → " . json_encode($params), 'ROUTER');
-          call_user_func_array($callback, $params);
+
+          array_shift($matches); // solo i parametri reali
+
+          Debug::log(
+            "🔌 Route plugin match: {$pattern} → " . json_encode($matches),
+            'ROUTER'
+          );
+
+          call_user_func_array($callback, $matches);
+
           $this->logHttpResponse(200, "Route plugin {$pattern}");
-          return null;
+
+          return null; // STOP ASSOLUTO
         }
       }
 

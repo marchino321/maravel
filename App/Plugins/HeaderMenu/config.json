@@ -1,7 +1,12 @@
 {
-    "name": "Header Menu",
-    "author": "Marco Dattisi",
-    "active": true,
-    "description": "Menu header solo per SuperAdmin",
-    "version":"1.0.0"
+  "name": "HeaderMenu",
+  "label": "Header Menu",
+  "version": "1.0.0",
+  "description": "Gestione menu superiore",
+  "author": "Marco Dattisi",
+  "namespace": "App\\Plugins\\HeaderMenu",
+  "main": "HeaderMenu.php",
+  "class": "HeaderMenu",
+  "active": false,
+  "min_core": "0.9.0"
 }

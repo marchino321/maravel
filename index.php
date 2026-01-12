@@ -70,7 +70,7 @@ if (!$isApi) {
   $twigManager->setTwig($twig);
 
   // Variabili globali Twig
-  $twigManager->addGlobal('menu', $menuManager->renderForTwig());
+
   $twigManager->addGlobal('NomeApp', Config::$site_name);
   $twigManager->addGlobal('Logo_App', Config::$Logo_App);
   $twigManager->addGlobal('link_footer', Config::$link_footer);
@@ -94,6 +94,7 @@ if (!$isApi) {
 
   $headerPlugin = new \App\Plugins\HeaderMenu\HeaderMenu();
   $twig->addGlobal('headerMenu', $headerPlugin->getMenu());
+  $twigManager->addGlobal('menu', $menuManager->renderForTwig());
 }
 
 
@@ -109,8 +110,12 @@ if (!in_array($lang, $supported, true)) {
 $_SESSION['lang'] = $lang;
 // 🌍 ORA le lingue dei plugin esistono
 Lang::set($lang);
-$twigManager->addGlobal('availableLangs', Lang::available());
-$twigManager->addGlobal('currentLang', Lang::current());
+if (!$isApi) {
+  $twigManager->addGlobal('availableLangs', Lang::available());
+  $twigManager->addGlobal('currentLang', Lang::current());
+}
+
+
 Debug::log("Lingue supporate adesso " . implode(', ', Lang::available()), 'LANG');
 // -------------------------
 // Dispatch della richiesta

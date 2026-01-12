@@ -23,9 +23,12 @@ class AjaxHelper {
         });
     }
 
-    static post(url, data = {}, options = {}) {
+    static post(url, data = {}, options = {}, showLoader = true) {
         return new Promise((resolve, reject) => {
+          if(showLoader){
             AjaxHelper.showLoader();
+          }
+            
 
             const isFormData = data instanceof FormData;
             if (isFormData) {

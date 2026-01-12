@@ -1,7 +1,12 @@
 {
-    "name": "Plug-in di servizio",
-    "author": "Marco Dattisi",
-    "active": true,
-    "description": "Plugin di esempio",
-    "version":"1.0.0"
+  "name": "PluginServizio",
+  "label": "Plug-in Service",
+  "version": "1.0.0",
+  "description": "Plugin per eseguire il logout",
+  "author": "Marco Dattisi",
+  "namespace": "App\\Plugins\\PluginServizio",
+  "main": "PluginServizio.php",
+  "class": "PluginServizio",
+  "active": false,
+  "min_core": "0.9.0"
 }

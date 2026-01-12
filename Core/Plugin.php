@@ -106,6 +106,7 @@ class Plugin
 
       // ✅ SEMPRE aggiunto alla lista
       $this->plugins[] = [
+        'label'    => $config['label'],
         'name'     => $folder,
         'slug'     => strtolower($folder),
         'class'    => $class,

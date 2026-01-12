@@ -11,12 +11,17 @@ class DropZone
   private string $name;
   private string $message;
   private string $id;
-
+  private bool $multiple;
+  private array  $extensions;
   public function __construct(array $options = [])
   {
     $this->name    = $options['name'] ?? 'upload';
     $this->message = $options['message'] ?? 'Trascina qui i file o clicca per selezionarli';
-
+    $this->multiple   = $options['multiple'] ?? false;
+    $this->extensions = array_map(
+      'strtolower',
+      $options['extensions'] ?? []   // 👈 vuoto = tutto consentito
+    );
     // ID univoco per evitare collisioni DOM
     $this->id = 'dz_' . substr(md5($this->name . microtime()), 0, 10);
 
@@ -102,6 +107,7 @@ CSS);
   {
     return <<<JS
 document.addEventListener('DOMContentLoaded', () => {
+
   const root = document.getElementById('{$this->id}');
   if (!root) return;
 
@@ -109,7 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileInput = root.querySelector('input[type="file"]');
   const previewContainer = root.querySelector('.preview-container');
 
-  let filesArray = [];
+  const dataTransfer = new DataTransfer();
+
+  // ✅ estensioni DINAMICHE dal DOM
+  const allowedExt = root.dataset.extensions
+    ? root.dataset.extensions.split(',').map(e => e.trim().toLowerCase())
+    : [];
+
+  const isMultiple = fileInput.hasAttribute('multiple');
 
   dropZone.addEventListener('click', () => fileInput.click());
 
@@ -132,7 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleFiles(files) {
     for (let file of files) {
-      filesArray.push(file);
+
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      if (allowedExt.length && !allowedExt.includes(ext)) {
+        alert('Sono ammessi solo file: ' + allowedExt.join(', '));
+        continue;
+      }
+
+      if (!isMultiple) {
+        dataTransfer.items.clear();
+        previewContainer.innerHTML = '';
+      }
+
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
 
       const previewItem = document.createElement('div');
       previewItem.className = 'preview-item';
@@ -141,26 +168,22 @@ document.addEventListener('DOMContentLoaded', () => {
       removeBtn.className = 'remove-btn';
       removeBtn.innerHTML = '&times;';
       removeBtn.onclick = () => {
-        filesArray = filesArray.filter(f => f !== file);
+        const newDT = new DataTransfer();
+        [...dataTransfer.files].forEach(f => {
+          if (f !== file) newDT.items.add(f);
+        });
+        dataTransfer.items.clear();
+        [...newDT.files].forEach(f => dataTransfer.items.add(f));
+        fileInput.files = dataTransfer.files;
         previewItem.remove();
       };
 
       previewItem.appendChild(removeBtn);
 
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          previewItem.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        const icon = document.createElement('div');
-        icon.className = 'file-icon';
-        icon.textContent = file.name.split('.').pop().toUpperCase();
-        previewItem.appendChild(icon);
-      }
+      const icon = document.createElement('div');
+      icon.className = 'file-icon';
+      icon.textContent = ext.toUpperCase();
+      previewItem.appendChild(icon);
 
       previewContainer.appendChild(previewItem);
     }
@@ -174,11 +197,16 @@ JS;
    */
   public function render(): string
   {
+    $accept = $this->extensions
+      ? implode(',', array_map(fn($e) => '.' . $e, $this->extensions))
+      : '';
+    $multiple = $this->multiple ? 'multiple' : '';
+    $array = $this->multiple ? '[]' : '';
     return <<<HTML
 <div class="upload-container" id="{$this->id}">
   <div class="drop-zone">
     <p>{$this->message}</p>
-    <input type="file" name="{$this->name}[]" multiple hidden>
+    <input type="file" name="{$this->name}{$array}" accept="{$accept}" {$multiple} hidden>
   </div>
   <div class="preview-container"></div>
 </div>

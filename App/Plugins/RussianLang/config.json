@@ -1,7 +1,12 @@
 {
-    "name": "Translate Example",
-    "author": "Marco Dattisi",
-    "active": true,
-    "description": "Example translation",
-    "version":"1.0.0"
+  "name": "RussianLang",
+  "label": "Lang RU",
+  "version": "1.0.0",
+  "description": "Traduzione lingua Russa",
+  "author": "Marco Dattisi",
+  "namespace": "App\\Plugins\\RussianLang",
+  "main": "RussianLang.php",
+  "class": "RussianLang",
+  "active": false,
+  "min_core": "0.9.0"
 }

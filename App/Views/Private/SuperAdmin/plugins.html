@@ -2,54 +2,94 @@
 
 {% block Body %}
 
+<div class="col-md-12 invisibile" id="caricaPlugin">
+  <div class="card ombra">
+    <div class="card-body">
+      {{ 'inizio' | startForm('/private/super-admin/upload-plugin', 'false') | raw }}
 
-<div class="row">
-  {% for p in plugins %}
-  {% if p.label != 'HeaderMenu' %}
-  <div class="col-md-6 col-xl-4">
-    <div class="card">
-      <div class="card-body">
+      {{ upload | raw }}
 
-        <div class="d-flex justify-content-between align-items-center">
-          <h5 class="mb-1">{{ p.label }}</h5>
+      <div class="col-md-12">
+        <button type="submit" class="btn btn-outline-info">Carica Plug-in</button>
+      </div>
+      {{ 'fine' | startForm() | raw }}
+    </div>
+  </div>
+</div>
 
-          <div class="form-check form-switch">
-            <input class="form-check-input plugin-toggle" type="checkbox" data-plugin="{{ p.name }}" {% if p.active
-              %}checked{% endif %}>
-          </div>
-        </div>
 
-        <small class="text-muted">
-          Versione <span class="text-info"><u>{{ p.version }}</u></span>
-        </small>
+<div class="col-md-12">
+  <div class="card ombra">
+    <div class="card-body">
+      <div class="row">
+        <table class="table table-bordered" id="plugin-table">
+          <thead>
+            <tr>
+              <th>Plugin</th>
+              <th>Descrizione</th>
+              <th>Status</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>Plugin</th>
+              <th>Descrizione</th>
+              <th>Status</th>
+              <th class="noInput">Azioni</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            {% for p in plugins %}
+            {% if p.label != 'Header Menu' %}
+            <tr>
+              <td>
+                {{ p.label }}<br>
 
-        {% if p.description %}
-        <p class="mt-2 mb-0 text-muted small">
-          {{ p.description }}
-        </p>
-        {% endif %}
+                <a href="javascript:void(0)" onclick="EliminaPlugin('{{ p.name }}')"><small
+                    class="text-danger">Elimina</small></a>
 
-        <div class="mt-2">
-          {% if p.active %}
-          <span class="text-success"><u>Attivo</u></span>
-          {% else %}
-          <span class="text-secondary"><u>Disattivato</u></span>
-          {% endif %}
-        </div>
+              </td>
+              <td>
+                <small class="text-muted">
+                  Versione <span class="text-info"><u>{{ p.version }}</u></span>
+                </small>
+                <p class="mt-2 mb-0 text-muted small">
+                  {{ p.description }}
+                </p>
+              </td>
+              <td>
+                {% if p.active %}
+                <span class="text-success"><u>Attivo</u></span>
+                {% else %}
+                <span class="text-secondary"><u>Disattivato</u></span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="form-check form-switch">
+                  <input class="form-check-input plugin-toggle" type="checkbox" data-plugin="{{ p.name }}" {% if
+                    p.active %}checked{% endif %}>
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
 
       </div>
     </div>
-  </div>
 
-  {% else %}
-  <p>Nessun plugin installato.</p>
-  {% endif %}
-  {% endfor %}
+  </div>
 </div>
+
 {% endblock %}
 {% block Script %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    let btn = document.getElementById('btn-add-dynamic');
+    btn.innerHTML = `<a href="javascript:void(0)" class="text-success" onclick="ShowChargePlugin()"><i class="fas fa-plus"></i>&nbsp; Aggiungi</a>`;
+    CaricaTabella('plugin-table');
     document.getElementsByClassName('page-title-main').innerHTML = "{{ Titolo ?? '' }}";
     document.querySelectorAll('.plugin-toggle').forEach(toggle => {
 
@@ -73,18 +113,18 @@
             return;
           }
 
-          AjaxHelper.post(
-            '/private/super-admin/toggle-plugin-ajax',
-            {
-              plugin: plugin,
-              active: active
-            },
-            function (res) {
+          AjaxHelper.post('/private/super-admin/toggle-plugin-ajax', {
+            plugin: plugin,
+            active: active
+          }, {}, false)
+            .then(res => {
 
-              if (!res || res.status !== 'ok') {
+              console.log(res);
+
+              if (res.data.status !== 'ok') {
                 Swal.fire(
                   'Errore',
-                  res?.error ?? 'Errore durante l’operazione',
+                  res.error ?? 'Errore durante l’operazione',
                   'error'
                 );
                 checkbox.checked = !checkbox.checked;
@@ -96,24 +136,90 @@
                 'Operazione completata',
                 'success'
               ).then(() => {
-                if (res.reload) {
+                if (res.data.reload) {
                   location.reload();
                 }
               });
-            },
-            function () {
+
+            })
+            .catch(() => {
               Swal.fire(
                 'Errore',
                 'Errore di comunicazione con il server',
                 'error'
               );
               checkbox.checked = !checkbox.checked;
-            }
-          );
+            });
 
         });
       });
     });
   });
+
+  function ShowChargePlugin() {
+    const box = document.getElementById('caricaPlugin');
+
+    if (!box) return;
+
+    const isHidden = box.classList.contains('invisibile');
+
+    if (isHidden) {
+      box.classList.remove('invisibile');
+    } else {
+      box.classList.add('invisibile');
+    }
+  }
+  function EliminaPlugin(nomePlugin) {
+
+    Swal.fire({
+      title: 'Eliminare plugin?',
+      text: `Il plugin "${nomePlugin}" verrà eliminato definitivamente`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sì, elimina',
+      cancelButtonText: 'Annulla'
+    }).then(result => {
+
+      if (!result.isConfirmed) return;
+
+      AjaxHelper.post(
+        '/private/super-admin/delete-plugin',
+        {
+          plugin: nomePlugin
+        }, {}, false
+      ).then(res => {
+
+        // 🔎 risposta standard del tuo framework
+        if (!res || res.data.status !== 'ok') {
+          Swal.fire(
+            'Errore',
+            res?.error ?? 'Errore durante eliminazione plugin',
+            'error'
+          );
+          return;
+        }
+
+        Swal.fire(
+          'Eliminato',
+          'Plugin eliminato correttamente',
+          'success'
+        ).then(() => {
+          if (res.data.reload) {
+            location.reload();
+          }
+        });
+
+      }).catch(err => {
+        console.error(err);
+        Swal.fire(
+          'Errore',
+          'Errore di comunicazione con il server',
+          'error'
+        );
+      });
+
+    });
+  }
 </script>
 {% endblock %}

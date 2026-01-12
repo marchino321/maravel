@@ -1,51 +1,112 @@
 {% extends "layout.html" %}
-{% block title %}{{ Titolo }}{% endblock %}
+
 {% block Body %}
 
-<div class="row">
-  {% for theme in themes %}
-  <div class="col-md-4">
-    <div class="card {% if theme.active %}border-success{% endif %}">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <strong>{{ theme.name }}</strong>
-        {% if theme.active %}
-        <span class="badge bg-success">Attivo</span>
-        {% endif %}
-      </div>
+<div class="col-md-12 invisibile" id="caricaThema">
+  <div class="card ombra">
+    <div class="card-body">
+      {{ 'inizio' | startForm('/private/super-admin/upload-thema', 'false') | raw }}
 
-      <div class="card-body">
-        <p class="text-muted mb-1">
-          {{ theme.description ?: 'Nessuna descrizione' }}
-        </p>
+      {{ upload | raw }}
 
-        <small class="text-muted">
-          Versione: <span class="text-info"><u>{{ theme.version ?: '—' }}</u></span><br>
-          Autore: <span class="text-success"><u>{{ theme.author ?: '—' }}</u></span>
-        </small>
+      <div class="col-md-12">
+        <button type="submit" class="btn btn-outline-info">Carica Thema</button>
       </div>
-
-      <div class="card-footer text-end">
-        {% if not theme.active %}
-        {{ 'inizio' | startForm('/private/super-admin/switch-theme', 'false') | raw }}
-        <input type="hidden" name="theme" value="{{ theme.id }}">
-        <button class="btn btn-sm btn-outline-primary">
-          Attiva tema
-        </button>
-        {{ 'fine' | startForm() | raw }}
-        {% else %}
-        <button class="btn btn-sm btn-success" disabled>
-          Tema attivo
-        </button>
-        {% endif %}
-      </div>
+      {{ 'fine' | startForm() | raw }}
     </div>
   </div>
-  {% endfor %}
 </div>
+
+
+<div class="col-md-12">
+  <div class="card ombra">
+    <div class="card-body">
+      <div class="row">
+        <table class="table table-bordered" id="theme-table">
+          <thead>
+            <tr>
+              <th>Thema</th>
+              <th>Descrizione</th>
+              <th>Version</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>Thema</th>
+              <th>Descrizione</th>
+              <th>Version</th>
+              <th class="noInput">Azioni</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            {% for theme in themes %}
+            <tr>
+              <td>
+                {{ theme.name }}<br>
+                <a href="javascript:void(0)" onclick="EliminaThema('{{ theme.id }}')"><small
+                    class="text-danger">Elimina</small></a>
+              </td>
+              <td>
+                <p class="text-muted mb-1">
+                  {{ theme.description ?: 'Nessuna descrizione' }}
+                </p>
+              </td>
+              <td>
+                <small class="text-muted">
+                  Versione: <span class="text-info"><u>{{ theme.version ?: '—' }}</u></span><br>
+                  Autore: <span class="text-success"><u>{{ theme.author ?: '—' }}</u></span>
+                </small>
+              </td>
+              <td>
+                {% if not theme.active %}
+                {{ 'inizio' | startForm('/private/super-admin/switch-theme', 'false') | raw }}
+                <input type="hidden" name="theme" value="{{ theme.id }}">
+                <button class="btn btn-sm btn-outline-primary">
+                  Attiva tema
+                </button>
+                {{ 'fine' | startForm() | raw }}
+                {% else %}
+                <button class="btn btn-sm btn-success" disabled>
+                  Tema attivo
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}
 {% block Script %}
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    CaricaTabella('theme-table');
+    let btn = document.getElementById('btn-add-dynamic');
+    btn.innerHTML = `<a href="javascript:void(0)" class="text-success" onclick="ShowChargeTheme()"><i class="fas fa-plus"></i>&nbsp; Aggiungi</a>`;
+  });
+  function ShowChargeTheme() {
+    const box = document.getElementById('caricaThema');
+
+    if (!box) return;
+
+    const isHidden = box.classList.contains('invisibile');
+
+    if (isHidden) {
+      box.classList.remove('invisibile');
+    } else {
+      box.classList.add('invisibile');
+    }
+  }
   document.querySelectorAll('form[action*="switch-theme"]').forEach(form => {
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -65,5 +126,56 @@
       });
     });
   });
+  function EliminaThema(nomeThema) {
+
+    Swal.fire({
+      title: 'Eliminare tema?',
+      html: `
+      <b>${nomeThema}</b><br>
+      Questa operazione è <span style="color:red">irreversibile</span>.
+    `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sì, elimina',
+      cancelButtonText: 'Annulla'
+    }).then(result => {
+
+      if (!result.isConfirmed) return;
+
+      AjaxHelper.post(
+        '/private/super-admin/delete-thema',
+        { theme: nomeThema },
+        {}, false
+      ).then(res => {
+
+        if (!res || res.data.status !== 'ok') {
+          Swal.fire(
+            'Errore',
+            res?.error ?? 'Errore durante eliminazione tema',
+            'error'
+          );
+          return;
+        }
+
+        Swal.fire(
+          'Eliminato',
+          'Tema eliminato correttamente',
+          'success'
+        ).then(() => {
+          location.reload();
+        });
+
+      }).catch(() => {
+        Swal.fire(
+          'Errore',
+          'Errore di comunicazione con il server',
+          'error'
+        );
+      });
+
+    });
+  }
 </script>
 {% endblock %}

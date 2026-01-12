@@ -4,12 +4,17 @@ namespace App\Controllers\Private;
 
 use App\Config;
 use App\Debug;
+use Core\Analyzer\PluginAnalyzer;
+use Core\Analyzer\ThemeAnalyzer;
 use Core\Auth;
 use Core\Classi\Flash;
+use Core\Components\DropZone;
 use Core\Controller;
+use Core\Helpers\FileSystemHelper;
 use Core\Helpers\FormHelper;
 use Core\MigrationManager;
 use Core\Plugin;
+use Core\Router;
 use Core\Services\CliCommandService;
 use Core\UpdateManager;
 use Core\View\TwigManager;
@@ -98,22 +103,116 @@ class SuperAdmin extends Controller
       $config = json_decode(file_get_contents($configFile), true);
 
       $plugins[] = [
-        'name'        => $name,
+        'name'        => $config['name'],
         'label'       => $config['label'] ?? $name,
         'description' => $config['description'] ?? '',
         'version'     => $config['version'] ?? '—',
         'active'      => (bool)($config['active'] ?? false),
 
+
       ];
     }
     Page::setTitle('🧩 Plugin installati');
+    $dropZone = new DropZone([
+      'name'    => 'plugin',
+      'message' => 'Trascina qui il tuo Plug-in (.zip)',
+      'extensions' => ['zip']
+    ]);
 
     echo $this->twigManager->getTwig()->render('Private/SuperAdmin/plugins.html', [
-      'plugins' => $plugins,
-
+      'plugins'     => $plugins,
+      'upload'      => $dropZone->render()
     ]);
   }
 
+
+  public function UploadPlugin(...$params): void
+  {
+    if (!Auth::checkSuperAdmin()) {
+      Flash::AddMex('Accesso negato');
+      header('Location: /private/super-admin/plugins', true, 303);
+      exit;
+    }
+
+    if (empty($_FILES['plugin'])) {
+      Flash::AddMex('Nessun file caricato');
+      header('Location: /private/super-admin/plugins', true, 303);
+      exit;
+    }
+    // dd($_FILES);
+    $file = $_FILES['plugin'];
+    if (is_array($file['name'])) {
+      $file = [
+        'name'     => $file['name'] ?? null,
+        'type'     => $file['type'] ?? null,
+        'tmp_name' => $file['tmp_name'] ?? null,
+        'error'    => $file['error'] ?? null,
+        'size'     => $file['size'] ?? null,
+      ];
+    }
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if ($ext !== 'zip') {
+      Flash::AddMex('Sono ammessi solo file ZIP');
+      header('Location: /private/super-admin/plugins', true, 303);
+      return;
+    }
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      Flash::AddMex('Errore durante upload file');
+      header('Location: /private/super-admin/plugins', true, 303);
+      exit;
+    }
+
+    // 📂 tmp
+    $tmpDir = Config::$tmpDir . '/plugin_uploads';
+    if (!is_dir($tmpDir)) {
+      mkdir($tmpDir, 0755, true);
+    }
+
+    $tmpZip = $tmpDir . '/' . uniqid('plugin_', true) . '.zip';
+    move_uploaded_file($file['tmp_name'], $tmpZip);
+
+    // 🔍 ANALYZE
+    $analyzer = new PluginAnalyzer($tmpZip);
+
+    if (!$analyzer->analyze()) {
+      foreach ($analyzer->getErrors() as $err) {
+        Flash::AddMex($err, Flash::DANGER);
+      }
+      unlink($tmpZip);
+      header('Location: /private/super-admin/plugins', true, 303);
+      exit;
+    }
+
+    $config = $analyzer->getConfig();
+    $pluginName = $config['name'];
+
+    $destination = Config::$pluginDir . '/' . $pluginName;
+
+    if (is_dir($destination)) {
+      Flash::AddMex("Plugin {$pluginName} già installato");
+      unlink($tmpZip);
+      header('Location: /private/super-admin/plugins', true, 303);
+      exit;
+    }
+
+    // 📦 UNZIP
+    $zip = new \ZipArchive();
+    $zip->open($tmpZip);
+    $zip->extractTo(Config::$pluginDir);
+    $zip->close();
+
+    unlink($tmpZip);
+
+    Flash::AddMex(
+      "Plugin {$config['label']} installato correttamente",
+      Flash::SUCCESS
+    );
+
+    header('Location: /private/super-admin/plugins', true, 303);
+    exit;
+  }
   public function togglePluginAjax(): void
   {
 
@@ -508,14 +607,121 @@ class SuperAdmin extends Controller
         'active'      => ($dir === $current),
       ];
     }
-
+    $dropZone = new DropZone([
+      'name'    => 'thema',
+      'message' => 'Trascina qui il tuo Thema (.zip)',
+      'extensions' => ['zip']
+    ]);
     echo $this->twigManager->getTwig()->render(
       'Private/SuperAdmin/themes.html',
       [
         'themes' => $themes,
-        'Titolo' => "Themes"
+        'upload' => $dropZone->render()
+
       ]
     );
+  }
+
+
+  public function UploadThema(...$params): void
+  {
+    // 🔒 Permessi
+    if (!Auth::checkSuperAdmin()) {
+      Flash::AddMex('Accesso negato', Flash::DANGER);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // 📦 File presente?
+    if (empty($_FILES['thema'])) {
+      Flash::AddMex('Nessun file caricato', Flash::WARNING);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    $file = $_FILES['thema'];
+
+    // ❌ Nessun file selezionato
+    if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+      Flash::AddMex('Nessun file selezionato', Flash::WARNING);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // ❌ Errori upload
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      Flash::AddMex('Errore durante il caricamento del file', Flash::DANGER);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // 🔍 Estensione
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if ($ext !== 'zip') {
+      Flash::AddMex('Sono ammessi solo file ZIP', Flash::DANGER);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // 📂 Directory temporanea
+    $tmpDir = Config::$tmpDir . '/theme_uploads';
+    if (!is_dir($tmpDir)) {
+      mkdir($tmpDir, 0755, true);
+    }
+
+    $tmpZip = $tmpDir . '/' . uniqid('theme_', true) . '.zip';
+
+    if (!move_uploaded_file($file['tmp_name'], $tmpZip)) {
+      Flash::AddMex('Impossibile salvare il file temporaneo', Flash::DANGER);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // 🔍 ANALISI TEMA
+    $analyzer = new ThemeAnalyzer($tmpZip);
+
+    if (!$analyzer->analyze()) {
+      foreach ($analyzer->getErrors() as $err) {
+        Flash::AddMex($err, Flash::DANGER);
+      }
+      unlink($tmpZip);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    $config = $analyzer->getConfig();
+    $themeName = $config['name'];
+
+    // ❌ Tema già presente
+    $destination = Config::$THEME . '/' . $themeName;
+    if (is_dir($destination)) {
+      Flash::AddMex("Il tema '{$themeName}' è già installato", Flash::WARNING);
+      unlink($tmpZip);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    // 📦 ESTRAZIONE
+    $zip = new \ZipArchive();
+    if ($zip->open($tmpZip) !== true) {
+      Flash::AddMex('Impossibile aprire il file ZIP', Flash::DANGER);
+      unlink($tmpZip);
+      header('Location: /private/super-admin/themes', true, 303);
+      exit;
+    }
+
+    $zip->extractTo(Config::$themeDir);
+    $zip->close();
+    unlink($tmpZip);
+
+    // ✅ OK
+    Flash::AddMex(
+      "Tema '{$config['name']}' installato correttamente",
+      Flash::SUCCESS
+    );
+
+    header('Location: /private/super-admin/themes', true, 303);
+    exit;
   }
   public function SwitchTheme(...$params)
   {
@@ -580,5 +786,75 @@ class SuperAdmin extends Controller
 
     header('Location: /private/super-admin/themes', true, 303);
     exit;
+  }
+  public function DeleteThema(): void
+  {
+    if (!Auth::checkSuperAdmin()) {
+      $this->jsonResponse(false, ['error' => 'Accesso negato']);
+      return;
+    }
+
+    $theme = $_POST['theme'] ?? null;
+    if (!$theme || !is_string($theme)) {
+      $this->jsonResponse(false, ['error' => 'Tema non valido']);
+      return;
+    }
+
+    if ($theme === Config::$THEME) {
+      $this->jsonResponse(false, ['error' => 'Non puoi eliminare il tema attivo']);
+      return;
+    }
+
+    $themeDir = Config::$themeDir . '/' . basename($theme);
+
+    if (!is_dir($themeDir)) {
+      $this->jsonResponse(false, ['error' => 'Tema non trovato']);
+      return;
+    }
+
+    try {
+      // 🔒 anti traversal: deve stare dentro themeDir
+      FileSystemHelper::assertInsideBaseDir($themeDir, Config::$themeDir);
+      FileSystemHelper::deleteDirectory($themeDir);
+    } catch (\Throwable $e) {
+      $this->jsonResponse(false, ['error' => $e->getMessage()]);
+      return;
+    }
+
+    Debug::log("Tema eliminato: {$theme}", 'THEME');
+
+    $this->jsonResponse(true, ['status' => 'ok', 'reload' => true]);
+  }
+  public function DeletePlugin(): void
+  {
+    if (!Auth::checkSuperAdmin()) {
+      $this->jsonResponse(false, ['error' => 'Accesso negato']);
+      return;
+    }
+
+    $plugin = $_POST['plugin'] ?? null;
+    if (!$plugin || !is_string($plugin)) {
+      $this->jsonResponse(false, ['error' => 'Plugin non valido']);
+      return;
+    }
+
+    $pluginDir = Config::$pluginDir . '/' . basename($plugin);
+
+    if (!is_dir($pluginDir)) {
+      $this->jsonResponse(false, ['error' => 'Plugin non trovato']);
+      return;
+    }
+
+    try {
+      FileSystemHelper::assertInsideBaseDir($pluginDir, Config::$pluginDir);
+      FileSystemHelper::deleteDirectory($pluginDir);
+    } catch (\Throwable $e) {
+      $this->jsonResponse(false, ['error' => $e->getMessage()]);
+      return;
+    }
+
+    Debug::log("Plugin eliminato: {$plugin}", 'PLUGIN');
+
+    $this->jsonResponse(true, ['status' => 'ok', 'reload' => true]);
   }
 }

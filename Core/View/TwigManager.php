@@ -16,6 +16,7 @@ class TwigManager extends AbstractExtension
   private array $globals = [];
   private array $filters = [];
   private array $functions = [];
+  private FilesystemLoader $loader;
   private Environment $twig;
 
   public function __construct(?string $jsonConfig = null)
@@ -28,8 +29,9 @@ class TwigManager extends AbstractExtension
 
 
 
-    $loader = new FilesystemLoader($viewsPaths);
-    $this->twig = new SafeTwigEnvironment($loader, [
+    $this->loader = new FilesystemLoader($viewsPaths);
+
+    $this->twig = new SafeTwigEnvironment($this->loader, [
       'debug'       => true,
       'auto_reload' => true,
       'cache'       => false,
@@ -65,7 +67,21 @@ class TwigManager extends AbstractExtension
 
     Debug::log("✏️ Twig Environment inizializzato con Views: " . implode(', ', $viewsPaths), 'VIEW');
   }
+  /**
+   * Registra un path Twig con namespace (per plugin / temi)
+   * Uso: @ApiInspector/index.html
+   */
+  public function addPath(string $path, string $namespace): void
+  {
+    if (!is_dir($path)) {
+      Debug::log("⚠️ Twig path non valido: {$path}", 'VIEW');
+      return;
+    }
 
+    $this->loader->addPath($path, $namespace);
+
+    Debug::log("📁 Twig path aggiunto: {$path} come @{$namespace}", 'VIEW');
+  }
   public function setTwig(Environment $twig): void
   {
     $this->twig = $twig;
