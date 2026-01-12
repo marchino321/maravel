@@ -1,39 +1,30 @@
 {% extends 'layout.html' %}
 {% block title %}
-	{{ Titolo }}
+{{ Titolo }}
 {% endblock %}
 {% block css %}{% endblock %}
 {% block Body %}
-	<div class="col-lg-12">
-		<div class="card ombra">
-			<div class="card-body">
-				{{ Elenco | raw }}
+<div class="col-lg-12">
+  <div class="card ombra">
+    <div class="card-body">
+      {{ Elenco | raw }}
 
 
-			</div>
+    </div>
 
-		</div>
-	</div>
+  </div>
+</div>
 
 
 {% endblock %}
 
 {% block Script %}
 
-	<script type="text/javascript">
-		$(document).ready(() => {
-CaricaTabella("dynamicTableCustom");
-TableInput("dynamicTableCustom", "/private/collaboratori/elenco-collaboratori");
-
-
-
-$('#btn-add-dynamic').html(`<a href="{{ Link }}" class="text-success">
-                    <i class="fas fa-plus"></i>&nbsp; {{ Label }}</a>`);
-
-
-// $('#indietro_btn').remove();
-
-})
-	</script>
+<script type="text/javascript">
+  $(document).ready(() => {
+    $('#btn-add-dynamic').html(`<a href="{{ Link }}" class="text-success"><i class="fas fa-plus"></i>&nbsp; {{ Label }}</a>`);
+    // $('#indietro_btn').remove();
+  })
+</script>
 
 {% endblock %}
