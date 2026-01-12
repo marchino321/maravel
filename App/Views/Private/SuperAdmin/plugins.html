@@ -5,6 +5,7 @@
 
 <div class="row">
   {% for p in plugins %}
+  {% if p.label != 'HeaderMenu' %}
   <div class="col-md-6 col-xl-4">
     <div class="card">
       <div class="card-body">
@@ -39,8 +40,10 @@
       </div>
     </div>
   </div>
+
   {% else %}
   <p>Nessun plugin installato.</p>
+  {% endif %}
   {% endfor %}
 </div>
 {% endblock %}
