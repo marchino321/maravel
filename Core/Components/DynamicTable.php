@@ -28,7 +28,7 @@ class DynamicTable
     $this->rows = $rows;
     $this->columns = $columns;
     $this->options = $options;
-    $this->tableId = $options['id'] ?? 'datatable_' . md5(uniqid());
+    $this->tableId = 'datatable_' . md5(json_encode(array_keys($columns)));
     // Mappatura automatica dei dati pre-caricati
     foreach ($preloadedData as $key => $data) {
       $this->preloadedData[$key] = $this->autoMap($key, $data);
