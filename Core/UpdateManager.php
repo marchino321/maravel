@@ -24,15 +24,15 @@ class UpdateManager
   {
     $this->versionFile  = Config::$configDir . '/update.json';
     $this->updateServer = "https://hd.marcodattisi.it/MyFiles/core.json";
-    // $systemDir = $_SERVER['DOCUMENT_ROOT'] . '/_system';
+    $systemDir = $_SERVER['DOCUMENT_ROOT'] . '/_system';
 
-    // if (!is_dir($systemDir)) {
-    //   mkdir($systemDir, 0777, true);
-    //   Debug::log("📁 Directory _system creata", 'UPDATE');
-    // }
+    if (!is_dir($systemDir)) {
+      mkdir($systemDir, 0777, true);
+      Debug::log("📁 Directory _system creata", 'UPDATE');
+    }
 
-    $this->backupDir = Config::$systemDir . '/backups';
-    $this->lockFile  = Config::$systemDir . '/.update_lock';
+    $this->backupDir = $systemDir . '/backups';
+    $this->lockFile  = $systemDir . '/.update_lock';
   }
 
   /**

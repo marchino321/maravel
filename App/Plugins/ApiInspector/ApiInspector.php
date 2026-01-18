@@ -39,9 +39,15 @@ class ApiInspector extends PluginController
         null,
         'mdi mdi-api'
       );
-      // \App\Debug::log('DOPO addMenuItem, count=' . count($menuManager->getMenu()), 'API-INSPECTOR');
     }
     $router->addPluginRoute('api-inspector', function () use ($twigManager) {
+      if (!Auth::checkSuperAdmin()) {
+        http_response_code(403);
+        return [
+          'success' => false,
+          'error'   => 'Accesso negato'
+        ];
+      }
       Page::setTitle('Api Inspector');
       echo $twigManager->getTwig()->render(
         '@ApiInspector/index.html',
