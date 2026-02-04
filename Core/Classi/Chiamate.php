@@ -112,14 +112,11 @@ class Chiamate extends Model
   public function Cancella(string $tabella, string $campo, string $input): int
   {
     $this->tabella = $tabella;
-
     $oldRows = $this->seleziona($tabella, $campo, $input);
     $oldData = $oldRows[0] ?? [];
-
     $sql = "DELETE FROM `$tabella` WHERE $campo = :input";
     $stmt = $this->db->prepare($sql);
     $stmt->bindValue(':input', $input, PDO::PARAM_STR);
-
     try {
       $stmt->execute();
       $this->errori = $stmt->errorInfo();
@@ -390,6 +387,7 @@ class Chiamate extends Model
       '/*',
       '*/',
       '@@',
+      '++',
     ];
 
     foreach ($patternSospetti as $pattern) {
