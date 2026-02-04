@@ -8,10 +8,7 @@ use PDO;
 use PDOException;
 use Core\Model;
 
-
-if (!defined("CLI_MODE")) {
-  defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
-}
+defined(Config::$ABS_KEY) || exit('Accesso diretto non consentito.');
 /**
  * Classe Chiamate
  * 
@@ -72,9 +69,11 @@ class Chiamate extends Model
     $stmt = $this->db->prepare($sql);
 
     foreach ($datiValidi as $campo => $val) {
-      $stmt->bindValue(':' . $campo, $val);
+      $cleanVal = $this->Pulisci($val);
+      // echo $val . " " . $cleanVal . "<br>";
+      $stmt->bindValue(':' . $campo, $cleanVal);
     }
-
+    //die;
     $stmt->execute();
     $lastID = (int)$this->db->lastInsertId();
     $this->dbLogger->logInsert($tabella, $lastID, $dati);
@@ -82,31 +81,31 @@ class Chiamate extends Model
   }
 
   // ---------------- AGGIORNA ----------------
-  public function aggiorna(string $tabella, array $dati, string $chiave, $valore): bool
+  public function aggiorna(string $tabella, array $dati, string $chiave, $valore): int
   {
-    // Recupera colonne valide della tabella
     $colonne = $this->getColonne($tabella);
-
-    // Filtra i dati
     $datiValidi = array_intersect_key($dati, array_flip($colonne));
 
     if (empty($datiValidi)) {
       Debug::log("❌ Nessun campo valido per UPDATE in $tabella", "DB");
-      return false;
+      return 0;
     }
 
     $set = implode(", ", array_map(fn($c) => "$c = :$c", array_keys($datiValidi)));
-
     $sql = "UPDATE $tabella SET $set WHERE $chiave = :chiave";
     $stmt = $this->db->prepare($sql);
 
     foreach ($datiValidi as $campo => $val) {
-      $stmt->bindValue(':' . $campo, $val);
+      $stmt->bindValue(':' . $campo, $this->Pulisci($val));
     }
-    $oldData = $this->seleziona($tabella, $chiave, $valore);
     $stmt->bindValue(':chiave', $valore);
-    $this->dbLogger->logUpdate($tabella, $valore, $oldData[0], $dati);
-    return $stmt->execute();
+
+    $stmt->execute();
+    $righe = $stmt->rowCount();
+
+    Debug::log("🧩 UPDATE $tabella → {$righe} righe modificate WHERE $chiave = $valore", "DB");
+
+    return $righe; // 🔥 restituisce il numero di righe
   }
 
   // ---------------- CANCELLA ----------------
@@ -146,6 +145,7 @@ class Chiamate extends Model
 
     // Se non è la chiamata "dummy" (1,1) aggiungiamo la WHERE
     if (!($dove === "1" && $idRicerca === "1")) {
+
       $sql .= " WHERE $dove = :$dove";
       $valori[$dove] = $idRicerca;
     }
@@ -175,6 +175,64 @@ class Chiamate extends Model
     }
   }
 
+  /**
+   * Seleziona record usando una clausola IN (...)
+   *
+   * @param string $tabella Nome tabella
+   * @param string $campo Nome colonna su cui applicare IN
+   * @param array $valori Array di valori (interi o stringhe)
+   * @param array|string $join Eventuali join
+   * @param string $campi Campi da selezionare (default: *)
+   * @return array
+   */
+  public function selezionaIn(
+    string $tabella,
+    string $campo,
+    array $valori,
+    array|string $join = '',
+    string $campi = '*'
+  ): array {
+    if (empty($valori)) {
+      return [];
+    }
+
+    // Filtra i valori (no duplicati, no valori vuoti)
+    $valoriPuliti = array_unique(array_filter($valori, fn($v) => $v !== null && $v !== ''));
+    if (empty($valoriPuliti)) {
+      return [];
+    }
+
+    $this->tabella = $tabella;
+    $collegamento = $this->buildJoin($join);
+
+    // Segnaposto :id0, :id1, ...
+    $placeholders = [];
+    $binds = [];
+    foreach ($valoriPuliti as $k => $v) {
+      $ph = ":id$k";
+      $placeholders[] = $ph;
+      $binds[$ph] = $v;
+    }
+
+    $sql = "SELECT $campi FROM `$this->tabella` $collegamento 
+                WHERE $campo IN (" . implode(',', $placeholders) . ")";
+
+    $stmt = $this->db->prepare($sql);
+
+    // bind con tipi corretti
+    foreach ($binds as $ph => $v) {
+      $type = is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR;
+      $stmt->bindValue($ph, $v, $type);
+    }
+
+    try {
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (PDOException $e) {
+      $this->logError($sql, $e);
+      return [];
+    }
+  }
 
   // ---------------- DOPPI DINAMICA ----------------
   public function DoppiDinamica(string $tabella, string $campo, string $input): int
@@ -211,36 +269,81 @@ class Chiamate extends Model
   // ---------------- PULISCI ----------------
   public function Pulisci(?string $val): ?string
   {
-    if ($val === null || trim($val) === '') return null;
-    $this->PrevieniAttacchiSQL($val);
-    $val = str_replace('`', '\'', $val);
 
-    // JSON valido
-    if ($this->json_validate($val)) return $val;
-
-    $normalized = number_normalize($val);
-    if ($normalized !== $val) {
-      return $normalized;
+    // 🔹 Caso null
+    if ($val === null) {
+      return null;
     }
 
-    // Date
-    if ($this->checkIsAValidDate($val)) {
-      foreach ($this->formats as $format) {
-        $date = \DateTime::createFromFormat($format, $val);
-        if ($date !== false) return $date->format('Y-m-d H:i:s');
+    // 🔹 Caso numerico intero
+    if (is_int($val)) {
+      return $val;
+    }
+
+    // 🔹 Caso numerico con decimali
+    if (is_float($val)) {
+      return $val;
+    }
+
+    // 🔹 Caso stringa vuota
+    if (is_string($val) && trim($val) === '') {
+      return null;
+    }
+
+    // 🔹 Caso stringa valida → eseguo sanifiche
+    if (is_string($val)) {
+      $this->PrevieniAttacchiSQL($val);
+      $val = str_replace('`', '\'', $val);
+
+      // Se è JSON valido → ritorno stringa così com’è
+      if ($this->json_validate($val)) {
+        return $val;
       }
-      return date('Y-m-d H:i:s', strtotime($val));
+
+      // Normalizza soldi e percentuali
+      if (preg_match('/^\s*€?\s?[\d\.]+,\d{2}\s*$/', trim($val))) {
+        $normalized = str_replace(['€', '.', ' '], '', $val);
+        $normalized = str_replace(',', '.', $normalized);
+        return number_format((float)$normalized, 2, '.', '');
+      }
+
+      if (preg_match('/^\s*%?\s?\d+(?:[.,]\d+)?\s*%?\s*$/', trim($val))) {
+        $normalized = str_replace(['%', ' '], '', $val);
+        $normalized = str_replace(',', '.', $normalized);
+        return number_format((float)$normalized, 2, '.', '');
+      }
+
+      // Date riconosciute
+      if ($this->checkIsAValidDate($val)) {
+        foreach ($this->formats as $format) {
+          $date = \DateTime::createFromFormat($format, $val);
+          if ($date !== false) {
+            return $date->format('Y-m-d H:i:s');
+          }
+        }
+        return date('Y-m-d', strtotime($val));
+      }
+
+      // Password hash già valida
+      $passwordInfo = password_get_info($val);
+      if ($passwordInfo['algo'] !== 0) {
+        return $val;
+      }
+
+      // Default → stringa pulita
+      return $val;
     }
 
-    // Password hash
-    $passwordInfo = password_get_info($val);
-    if ($passwordInfo['algo'] !== 0) return $val;
-
-    return $val;
+    // 🔹 Qualsiasi altro tipo (array, oggetti) → li trasformo in JSON
+    return json_encode($val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
 
   public function checkIsAValidDate(string $myDateString): bool
   {
+    // escludi stringhe tipo "+39", "+40", numeri puri
+    if (preg_match('/^\+?\d+$/', trim($myDateString))) {
+      return false;
+    }
     return (bool)strtotime($myDateString);
   }
 
@@ -293,7 +396,7 @@ class Chiamate extends Model
       if (stripos($stringa, $pattern) !== false) {
         $log = "[" . date('Y-m-d H:i:s') . "] Input sospetto: -" . $stringa . "- | IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'CLI') . "\n";
         file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/logs/input_sospetti.log', $log, FILE_APPEND);
-        http_response_code(419);
+        http_response_code(400);
         die(json_encode(['error' => 'Input sospetto rilevato, contattare l\'amministratore']));
       }
     }
